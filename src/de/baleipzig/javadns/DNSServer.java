@@ -8,7 +8,7 @@ public class DNSServer {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		// es geht bei mir (Andre)
-		// test 2
+		// test
 
 	}
 
