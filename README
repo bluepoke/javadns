@@ -1,1 +1,10 @@
+<<<<<<< HEAD
 Hello Git!
+=======
+JavaDNS
+
+A server application acting as a simple DNS server as well as a client that can interact with this server.
+
+This project is part of the lecture "Server Sided Technologies" at Studienakademie Leipzig.
+http://www.informatik.ba-leipzig.de
+>>>>>>> ded56428675c00903b11ff0636a9c3c7a4cff6a0
