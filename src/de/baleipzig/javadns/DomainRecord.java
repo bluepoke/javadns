@@ -1,7 +1,7 @@
 package de.baleipzig.javadns;
 
+import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 
 import javax.naming.NamingEnumeration;
@@ -18,27 +18,76 @@ public class DomainRecord {
     public static final String RECORD_NS = "NS";
     public static final String RECORD_MX = "MX";
     public static final String RECORD_CNAME = "CNAME";
+    
+    private static HashMap<String, HashMap<String, Attribute>> records = new HashMap<String, HashMap<String, Attribute>>();
+    
+    // TODO: no net will result in socket exception which is not catched, yet!
+    public static Vector<String> lookup(String hostName, String record) {
+    	Vector<String> result = new Vector<String>();
+    	try {
+    		HashMap<String, Attribute> recordsEntry;
+    		// check whether the hostName is known
+    		if ((recordsEntry = records.get(hostName)) != null) {
+    			Attribute recordEntryAttribute;
+    			// check whether the specific attribute for this hostName is known
+    			if ((recordEntryAttribute = recordsEntry.get(record)) != null) {
+    				// fill the result with the appropriate String representations
+    				NamingEnumeration<?> recordEntryAttributeEnumeration = recordEntryAttribute.getAll();
+    				while (recordEntryAttributeEnumeration.hasMoreElements()) {
+    					result.add((String) recordEntryAttributeEnumeration.next());
+    				}
+    				// local lookup for both hostname and attribute was successful
+    				System.out.println("Local lookup for both " + record + " and " + hostName + " was successful.");
+    				return result;
+    			}
+				// the attribute could not be found for a known hostname
+    			else {
+    				Attribute lookupResult = remote_lookup(hostName, record);
+    				recordsEntry.put(lookupResult.getID(), lookupResult);
+        			// prepare the results
+        			NamingEnumeration<?> resultEnumeration = lookupResult.getAll();
+        			while (resultEnumeration.hasMoreElements()) {
+        				result.add((String) resultEnumeration.next());
+        			}
+        			// local lookup for hostname was succesful, but attribute was not known yet
+    				System.out.println("Local lookup for " + hostName + " was successful, but the attribute " + record + " was not found.");
+    				return result;
+    			}
+    		}
+    		// if either hostName or the specific attribute was not found, do a remote lookup for that
+    		else {
+    			Attribute lookupResult = remote_lookup(hostName, record);
 
-    public static List<String> lookup(String hostName, String record) {
+    			recordsEntry = new HashMap<String, Attribute>();
+    			recordsEntry.put(lookupResult.getID(), lookupResult);
+    			records.put(hostName, recordsEntry);
 
-        List<String> result = new Vector<String>();
-        try {
-            Hashtable<String, String> env = new Hashtable<String, String>();
-            env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
-            DirContext ictx = new InitialDirContext(env);
-            Attributes attrs = ictx.getAttributes(hostName, new String[] { record });
-            Attribute attr = attrs.get(record);
-            
-            NamingEnumeration<?> attrEnum = attr.getAll();
-            while (attrEnum.hasMoreElements())
-                result.add((String) attrEnum.next());
-            
-        } catch (NamingException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            System.out.println("Server did not return attribute for record: " + record);
-        }
-        return result;
+    			// prepare the results
+    			NamingEnumeration<?> resultEnumeration = lookupResult.getAll();
+    			while (resultEnumeration.hasMoreElements()) {
+    				result.add((String) resultEnumeration.next());
+    			}
+    			// be talkative!
+				System.out.println("Required remote lookup for " + record + " at " + hostName + ".");
+    			return result;
+    		}
+    	} catch (NamingException e) {
+    		System.out.println("No DNS name found for " + hostName + " and attribute " + record);
+    	} catch (NullPointerException e) {
+    		System.out.println("The attribute " + record + " is unknown to the server " + hostName);
+    	}
+		return result;
     }
 
+    private static Attribute remote_lookup(String hostName, String record) throws NamingException {
+    	// create a JNDI environment and context
+		Hashtable<String, String> env = new Hashtable<String, String>();
+		env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
+		DirContext ictx = new InitialDirContext(env);
+
+		// grab attributes for a single record
+		Attributes attributes = ictx.getAttributes(hostName, new String[] { record });
+		// return what you found
+		return attributes.get(record);
+    }
 }
