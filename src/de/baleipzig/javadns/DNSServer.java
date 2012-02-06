@@ -29,16 +29,35 @@
 
 package de.baleipzig.javadns;
 
+import java.util.Iterator;
+import java.util.List;
+
 public class DNSServer {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		// es geht bei mir (Andre)
-		// test
+		System.out.println("\nDNS for mowyourlawn.com returns:");
+        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_A));
+        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_MX));
+        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_NS));
+        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_SOA));
+        
+		System.out.println("\nDNS for google.de returns:");
+        printList(DomainRecord.lookup("google.de", "TXT"));
+        printList(DomainRecord.lookup("google.de", DomainRecord.RECORD_MX));
+        printList(DomainRecord.lookup("google.de", DomainRecord.RECORD_NS));
+        printList(DomainRecord.lookup("google.de", DomainRecord.RECORD_SOA));
 
 	}
 
+    static void printList(List<String> l) {
+        Iterator<String> iter = l.iterator();
+        while (iter.hasNext()) {
+            System.out.println(iter.next());
+        }
+        System.out.println();
+    }
+	
 }
