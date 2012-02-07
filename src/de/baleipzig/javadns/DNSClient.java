@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class DNSClient extends JFrame {
 	private JTextField txfName;
 	private JTextArea textArea;
 	private JTextField txfDnsIP;
-	private JComboBox cmbxOTHER;
+	private JComboBox<String> cmbxOTHER;
 	private final ButtonGroup btngrpRecordType = new ButtonGroup();
 	private JTextField txfDnsPort;
 	private final String REQUEST_SEPARATOR = ",";
@@ -56,6 +57,12 @@ public class DNSClient extends JFrame {
 		}
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new java.awt.event.WindowAdapter() {
+		    public void windowClosing(WindowEvent winEvt) {
+		        closeConnections();
+		        System.exit(0); 
+		    }
+		});
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		JPanel panel = new JPanel();
@@ -230,8 +237,8 @@ public class DNSClient extends JFrame {
 		gbc_rdbtnOTHER.gridy = 6;
 		panel.add(rdbtnOTHER, gbc_rdbtnOTHER);
 
-		cmbxOTHER = new JComboBox();
-		cmbxOTHER.setModel(new DefaultComboBoxModel(new String[] { "AFSDB",
+		cmbxOTHER = new JComboBox<String>();
+		cmbxOTHER.setModel(new DefaultComboBoxModel<String>(new String[] { "AFSDB",
 				"APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY",
 				"DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3",
 				"NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV",
@@ -377,6 +384,11 @@ public class DNSClient extends JFrame {
 		setLocationRelativeTo(null);
 		// show frame
 		setVisible(true);
+	}
+
+	protected void closeConnections() {
+		// TODO close all open connections and sockets
+		
 	}
 
 	public static void main(String[] args) {

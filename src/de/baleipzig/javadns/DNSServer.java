@@ -94,6 +94,7 @@ public class DNSServer extends JFrame {
 	 */
 	public static void main(String[] args) {
 		DNSServer server = new DNSServer("DNS Server");
+		server.setLocationRelativeTo(null);
 		server.setVisible(true);
 		
 		System.out.println(lookup("google.de", "A"));
