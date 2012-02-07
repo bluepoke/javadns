@@ -42,6 +42,12 @@ import javax.swing.UIManager;
 
 @SuppressWarnings("serial")
 public class DNSServer extends JFrame {
+	private JTextArea logTextArea;
+	
+	private void addLog(String log) {
+		logTextArea.append(log);
+	}
+
 	public DNSServer(String title) {
 		setMinimumSize(new Dimension(600, 500));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -69,7 +75,7 @@ public class DNSServer extends JFrame {
 		JScrollPane logScrollPane = new JScrollPane();
 		splitPane.setLeftComponent(logScrollPane);
 		
-		JTextArea logTextArea = new JTextArea();
+		logTextArea = new JTextArea();
 		logTextArea.setEditable(false);
 		logScrollPane.setViewportView(logTextArea);
 		
