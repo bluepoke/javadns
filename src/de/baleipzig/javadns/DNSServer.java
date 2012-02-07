@@ -29,19 +29,82 @@
 
 package de.baleipzig.javadns;
 
-public class DNSServer {
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.WindowEvent;
 
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTree;
+import javax.swing.UIManager;
+
+@SuppressWarnings("serial")
+public class DNSServer extends JFrame {
+	public DNSServer(String title) {
+		setMinimumSize(new Dimension(600, 500));
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new java.awt.event.WindowAdapter() {
+		    public void windowClosing(WindowEvent winEvt) {
+		        closeConnections();
+		        System.exit(0); 
+		    }
+		});
+		
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			// simply ignore if it doesn't work
+		}
+		
+		setTitle(title);
+		getContentPane().setLayout(new BorderLayout(0, 0));
+		
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setEnabled(false);
+		splitPane.setResizeWeight(0.75);
+		getContentPane().add(splitPane);
+		
+		JScrollPane logScrollPane = new JScrollPane();
+		splitPane.setLeftComponent(logScrollPane);
+		
+		JTextArea logTextArea = new JTextArea();
+		logTextArea.setEditable(false);
+		logScrollPane.setViewportView(logTextArea);
+		
+		JScrollPane treeScrollPane = new JScrollPane();
+		splitPane.setRightComponent(treeScrollPane);
+		
+		JTree recordTree = new JTree();
+		treeScrollPane.setViewportView(recordTree);
+	}
+
+	protected void closeConnections() {
+		// TODO close all open connections and sockets
+		
+	}
+
+	protected static DomainRecordMessage lookup(String hostName, String recordType) {
+		return DomainRecord.lookup(hostName, recordType);
+	}
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DomainRecord.lookup("google.de", "A");
-		DomainRecord.lookup("heise.de", "AAAA");
-		DomainRecord.lookup("google.de", "A");
-		DomainRecord.lookup("google.com", "A");
-		DomainRecord.lookup("eveonline.com", "A");
-		DomainRecord.lookup("eveonline.com", "NS");
-		DomainRecord.lookup("hhrhere.com", "A");
-		DomainRecord.lookup("hhrhere.com", "NS");
+		DNSServer server = new DNSServer("DNS Server");
+		server.setVisible(true);
+		
+		System.out.println(lookup("google.de", "A"));
+		System.out.println(lookup("heise.de", "AAAA"));
+		System.out.println(lookup("google.com", "RP"));
+		System.out.println(lookup("google.com", "A"));
+		System.out.println(lookup("eveonline.com", "A"));
+		System.out.println(lookup("eveonline.com", "NS"));
+		System.out.println(lookup("hhrhere.com", "A"));
+		System.out.println(lookup("hhrhere.com", "NS"));
+		System.out.println(lookup("heise.de", "TXT"));
+		System.out.println(lookup("heise.de", "A"));
 	}	
 }

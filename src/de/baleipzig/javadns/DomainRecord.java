@@ -22,7 +22,11 @@ public class DomainRecord {
     private static HashMap<String, HashMap<String, Attribute>> records 
     	= new HashMap<String, HashMap<String, Attribute>>();
     
-    public static Vector<String> lookup(String hostName, String record) {
+    public static DomainRecordMessage lookup(String hostName, String record) {
+    	DomainRecordMessage dnsMessage = new DomainRecordMessage();
+    	dnsMessage.setHostName(hostName);
+    	dnsMessage.setRecordType(record);
+    	
     	Vector<String> result = new Vector<String>();
     	try {
     		HashMap<String, Attribute> recordsEntry;
@@ -36,10 +40,10 @@ public class DomainRecord {
     				while (recordEntryAttributeEnumeration.hasMoreElements()) {
     					result.add((String) recordEntryAttributeEnumeration.next());
     				}
-    				// local lookup for both hostname and attribute was successful
-    				System.out.println("Local lookup for the " + record + " for " 
-    						+ hostName + " was successful. " + result.toString());
-    				return result;
+    				dnsMessage.setDnsResult(result);
+    				dnsMessage.setLocalHostname(true);
+    				dnsMessage.setLocalAttribute(true);
+    				return dnsMessage;
     			}
 				// the attribute could not be found for a known hostname
     			else {
@@ -50,10 +54,10 @@ public class DomainRecord {
         			while (resultEnumeration.hasMoreElements()) {
         				result.add((String) resultEnumeration.next());
         			}
-        			// local lookup for hostname was succesful, but attribute was not known yet
-    				System.out.println("Local lookup for " + hostName + " was successful, but the attribute " 
-    						+ record + " required remote lookup. " + result.toString());
-    				return result;
+    				dnsMessage.setDnsResult(result);
+    				dnsMessage.setLocalHostname(true);
+    				dnsMessage.setLocalAttribute(false);
+    				return dnsMessage;    			
     			}
     		}
     		// if either hostName or the specific attribute was not found, do a remote lookup for that
@@ -69,19 +73,18 @@ public class DomainRecord {
     			while (resultEnumeration.hasMoreElements()) {
     				result.add((String) resultEnumeration.next());
     			}
-    			// be talkative!
-				System.out.println("Required remote lookup for " + record + " at " 
-						+ hostName + ". " + result.toString());
-    			return result;
+				dnsMessage.setDnsResult(result);
+				dnsMessage.setLocalHostname(false);
+				dnsMessage.setLocalAttribute(false);
+				return dnsMessage;    		
     		}
     	} catch (NamingException e) {
-    		System.out.println("No DNS name found for " + hostName + " and attribute " 
-    				+ record + ". " + result.toString());
+			dnsMessage.setUnknownDNS(true);
     	} catch (NullPointerException e) {
-    		System.out.println("The attribute " + record + " is unknown to the server " 
-    				+ hostName + ". " + result.toString());
+    		dnsMessage.setUnknownAttribute(true);
     	}
-		return result;
+		dnsMessage.setDnsResult(result);
+		return dnsMessage;
     }
 
     private static Attribute remote_lookup(String hostName, String record) throws NamingException {
