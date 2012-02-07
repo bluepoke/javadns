@@ -61,6 +61,11 @@ public class DNSServer extends JFrame {
 	private JTextField txfPort;
 	private ServerWorker serverWorker;
 
+	
+	private void addLog(String log) {
+		logTextArea.append(log);
+	}
+
 	public DNSServer(String title) {
 		setMinimumSize(new Dimension(600, 500));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
