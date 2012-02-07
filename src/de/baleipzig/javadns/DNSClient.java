@@ -55,11 +55,11 @@ public class DNSClient extends JFrame {
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
-		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0,
 				Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, 1.0, Double.MIN_VALUE };
+				0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
 		JLabel lblDns = new JLabel("DNS IP:");
@@ -263,13 +263,26 @@ public class DNSClient extends JFrame {
 		gbc_btnStartLookup.gridx = 1;
 		gbc_btnStartLookup.gridy = 7;
 		panel.add(btnStartLookup, gbc_btnStartLookup);
+		
+		JButton btnResetServer = new JButton("Reset Server");
+		btnResetServer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO: send reset message to server
+			}
+		});
+		GridBagConstraints gbc_btnResetServer = new GridBagConstraints();
+		gbc_btnResetServer.anchor = GridBagConstraints.WEST;
+		gbc_btnResetServer.insets = new Insets(0, 0, 5, 5);
+		gbc_btnResetServer.gridx = 1;
+		gbc_btnResetServer.gridy = 8;
+		panel.add(btnResetServer, gbc_btnResetServer);
 
 		JLabel lblResponse = new JLabel("Log:");
 		GridBagConstraints gbc_lblResponse = new GridBagConstraints();
 		gbc_lblResponse.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblResponse.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResponse.gridx = 0;
-		gbc_lblResponse.gridy = 8;
+		gbc_lblResponse.gridy = 9;
 		panel.add(lblResponse, gbc_lblResponse);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -277,7 +290,7 @@ public class DNSClient extends JFrame {
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridwidth = 3;
 		gbc_scrollPane.gridx = 1;
-		gbc_scrollPane.gridy = 8;
+		gbc_scrollPane.gridy = 9;
 		panel.add(scrollPane, gbc_scrollPane);
 
 		textArea = new JTextArea();
