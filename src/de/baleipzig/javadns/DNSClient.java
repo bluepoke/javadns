@@ -13,6 +13,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -24,9 +25,11 @@ import javax.swing.ButtonGroup;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.JScrollPane;
+import javax.swing.ImageIcon;
 
 @SuppressWarnings("serial")
 public class DNSClient extends JFrame {
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static final String RB_A_LABEL = "A (IPv4)";
 	private JTextField txfName;
 	private JTextArea textArea;
@@ -36,7 +39,7 @@ public class DNSClient extends JFrame {
 	private JTextField txfDnsPort;
 
 	public DNSClient() {
-		setMinimumSize(new Dimension(400, 400));
+		setMinimumSize(new Dimension(600, 500));
 		setTitle("DNS Client");
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -51,9 +54,9 @@ public class DNSClient extends JFrame {
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
+		gbl_panel.columnWidths = new int[] { 0, 0, 0, 0, 0, 0 };
 		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0,
+		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0, 0.0,
 				Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				0.0, 0.0, 1.0, Double.MIN_VALUE };
@@ -70,8 +73,8 @@ public class DNSClient extends JFrame {
 		txfDnsIP = new JTextField();
 		txfDnsIP.setText("127.0.0.1");
 		GridBagConstraints gbc_txfDnsIP = new GridBagConstraints();
-		gbc_txfDnsIP.gridwidth = 3;
-		gbc_txfDnsIP.insets = new Insets(0, 0, 5, 0);
+		gbc_txfDnsIP.gridwidth = 4;
+		gbc_txfDnsIP.insets = new Insets(0, 0, 5, 5);
 		gbc_txfDnsIP.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txfDnsIP.gridx = 1;
 		gbc_txfDnsIP.gridy = 0;
@@ -90,8 +93,8 @@ public class DNSClient extends JFrame {
 		txfDnsPort.setText("53");
 		GridBagConstraints gbc_txfDnsPort = new GridBagConstraints();
 		gbc_txfDnsPort.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txfDnsPort.gridwidth = 3;
-		gbc_txfDnsPort.insets = new Insets(0, 0, 5, 0);
+		gbc_txfDnsPort.gridwidth = 4;
+		gbc_txfDnsPort.insets = new Insets(0, 0, 5, 5);
 		gbc_txfDnsPort.gridx = 1;
 		gbc_txfDnsPort.gridy = 1;
 		panel.add(txfDnsPort, gbc_txfDnsPort);
@@ -108,8 +111,8 @@ public class DNSClient extends JFrame {
 		txfName = new JTextField();
 		txfName.setText("google.de");
 		GridBagConstraints gbc_txfName = new GridBagConstraints();
-		gbc_txfName.gridwidth = 3;
-		gbc_txfName.insets = new Insets(0, 0, 5, 0);
+		gbc_txfName.gridwidth = 4;
+		gbc_txfName.insets = new Insets(0, 0, 5, 5);
 		gbc_txfName.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txfName.gridx = 1;
 		gbc_txfName.gridy = 2;
@@ -140,9 +143,9 @@ public class DNSClient extends JFrame {
 		rdbtnNS.setActionCommand("NS");
 		btngrpRecordType.add(rdbtnNS);
 		GridBagConstraints gbc_rdbtnNS = new GridBagConstraints();
-		gbc_rdbtnNS.gridwidth = 2;
+		gbc_rdbtnNS.gridwidth = 3;
 		gbc_rdbtnNS.anchor = GridBagConstraints.WEST;
-		gbc_rdbtnNS.insets = new Insets(0, 0, 5, 0);
+		gbc_rdbtnNS.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnNS.gridx = 2;
 		gbc_rdbtnNS.gridy = 3;
 		panel.add(rdbtnNS, gbc_rdbtnNS);
@@ -161,9 +164,9 @@ public class DNSClient extends JFrame {
 		rdbtnRP.setActionCommand("RP");
 		btngrpRecordType.add(rdbtnRP);
 		GridBagConstraints gbc_rdbtnRP = new GridBagConstraints();
-		gbc_rdbtnRP.gridwidth = 2;
+		gbc_rdbtnRP.gridwidth = 3;
 		gbc_rdbtnRP.anchor = GridBagConstraints.WEST;
-		gbc_rdbtnRP.insets = new Insets(0, 0, 5, 0);
+		gbc_rdbtnRP.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnRP.gridx = 2;
 		gbc_rdbtnRP.gridy = 4;
 		panel.add(rdbtnRP, gbc_rdbtnRP);
@@ -184,7 +187,7 @@ public class DNSClient extends JFrame {
 		GridBagConstraints gbc_rdbtnTXT = new GridBagConstraints();
 		gbc_rdbtnTXT.gridwidth = 2;
 		gbc_rdbtnTXT.anchor = GridBagConstraints.WEST;
-		gbc_rdbtnTXT.insets = new Insets(0, 0, 5, 0);
+		gbc_rdbtnTXT.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnTXT.gridx = 2;
 		gbc_rdbtnTXT.gridy = 5;
 		panel.add(rdbtnTXT, gbc_rdbtnTXT);
@@ -222,7 +225,7 @@ public class DNSClient extends JFrame {
 		txfOTHER = new JTextField();
 		txfOTHER.setEnabled(false);
 		GridBagConstraints gbc_txfOTHER = new GridBagConstraints();
-		gbc_txfOTHER.insets = new Insets(0, 0, 5, 0);
+		gbc_txfOTHER.insets = new Insets(0, 0, 5, 5);
 		gbc_txfOTHER.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txfOTHER.gridx = 3;
 		gbc_txfOTHER.gridy = 6;
@@ -232,7 +235,6 @@ public class DNSClient extends JFrame {
 		JButton btnStartLookup = new JButton("Start Lookup");
 		btnStartLookup.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				textArea.setText("");
 				String dnsAddress = txfDnsIP.getText();
 				String dnsPort = txfDnsPort.getText();
 				String lookupName = txfName.getText();
@@ -250,11 +252,38 @@ public class DNSClient extends JFrame {
 						recordType = txfOTHER.getText();
 					}
 					// FIXME: Debug output
-					textArea.append("Requesting "+recordType+" for "+lookupName+" from "+dnsAddress+":"+dnsPort);
+					textArea.append("Requesting "+recordType+" for "+lookupName+" from "+dnsAddress+":"+dnsPort+LINE_SEPARATOR);
 					// TODO: Perform Lookup
 				}
 			}
 		});
+		
+		JButton btnHelp = new JButton("");
+		btnHelp.setPreferredSize(new Dimension(30, 25));
+		btnHelp.setMaximumSize(new Dimension(20, 20));
+		btnHelp.setMinimumSize(new Dimension(20, 20));
+		btnHelp.setIcon(new ImageIcon(DNSClient.class.getResource("/de/baleipzig/javadns/images/help.png")));
+		btnHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JOptionPane.showMessageDialog(null, "Further available record types are:\r\n" +
+						"AFSDB, APL, CERT, CNAME,\r\n" +
+						"DHCID, DLV, DNAME, DNSKEY, \r\n" +
+						"DS, HIP, IPSECKEY, KEY, \r\n" +
+						"KX, NAPTR, NSEC, NSEC3, \r\n" +
+						"NSEC3PARAM, PTR, RRSIG, SIG, \r\n" +
+						"SOA, SPF, SRV, SSHFP, \r\n" +
+						"TA, TKEY, TSIG");
+			}
+		});
+		btnHelp.setContentAreaFilled(false);
+		btnHelp.setBorderPainted(false);
+		GridBagConstraints gbc_btnHelp = new GridBagConstraints();
+		gbc_btnHelp.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_btnHelp.gridheight = 2;
+		gbc_btnHelp.insets = new Insets(0, 0, 5, 0);
+		gbc_btnHelp.gridx = 4;
+		gbc_btnHelp.gridy = 5;
+		panel.add(btnHelp, gbc_btnHelp);
 		GridBagConstraints gbc_btnStartLookup = new GridBagConstraints();
 		gbc_btnStartLookup.insets = new Insets(0, 0, 5, 5);
 		gbc_btnStartLookup.anchor = GridBagConstraints.WEST;
@@ -262,7 +291,7 @@ public class DNSClient extends JFrame {
 		gbc_btnStartLookup.gridy = 7;
 		panel.add(btnStartLookup, gbc_btnStartLookup);
 
-		JLabel lblResponse = new JLabel("Response:");
+		JLabel lblResponse = new JLabel("Log:");
 		GridBagConstraints gbc_lblResponse = new GridBagConstraints();
 		gbc_lblResponse.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblResponse.insets = new Insets(0, 0, 0, 5);
@@ -273,7 +302,7 @@ public class DNSClient extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridwidth = 3;
+		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
 		gbc_scrollPane.gridx = 1;
 		gbc_scrollPane.gridy = 8;
