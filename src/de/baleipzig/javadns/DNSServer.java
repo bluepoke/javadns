@@ -29,35 +29,19 @@
 
 package de.baleipzig.javadns;
 
-import java.util.Iterator;
-import java.util.List;
-
 public class DNSServer {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("\nDNS for mowyourlawn.com returns:");
-        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_A));
-        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_MX));
-        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_NS));
-        printList(DomainRecord.lookup("mowyourlawn.com", DomainRecord.RECORD_SOA));
-        
-		System.out.println("\nDNS for google.de returns:");
-        printList(DomainRecord.lookup("google.de", "TXT"));
-        printList(DomainRecord.lookup("google.de", DomainRecord.RECORD_MX));
-        printList(DomainRecord.lookup("google.de", DomainRecord.RECORD_NS));
-        printList(DomainRecord.lookup("google.de", DomainRecord.RECORD_SOA));
-
-	}
-
-    static void printList(List<String> l) {
-        Iterator<String> iter = l.iterator();
-        while (iter.hasNext()) {
-            System.out.println(iter.next());
-        }
-        System.out.println();
-    }
-	
+		DomainRecord.lookup("google.de", "A");
+		DomainRecord.lookup("heise.de", "AAAA");
+		DomainRecord.lookup("google.de", "A");
+		DomainRecord.lookup("google.com", "A");
+		DomainRecord.lookup("eveonline.com", "A");
+		DomainRecord.lookup("eveonline.com", "NS");
+		DomainRecord.lookup("hhrhere.com", "A");
+		DomainRecord.lookup("hhrhere.com", "NS");
+	}	
 }
