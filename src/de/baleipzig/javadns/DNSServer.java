@@ -36,7 +36,7 @@ public class DNSServer {
 	 */
 	public static void main(String[] args) {
 		DomainRecord.lookup("google.de", "A");
-		DomainRecord.lookup("www.google.de", "TXT");
+		DomainRecord.lookup("heise.de", "AAAA");
 		DomainRecord.lookup("google.de", "A");
 		DomainRecord.lookup("google.com", "A");
 		DomainRecord.lookup("eveonline.com", "A");

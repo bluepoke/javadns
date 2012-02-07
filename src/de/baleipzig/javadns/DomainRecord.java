@@ -19,9 +19,9 @@ public class DomainRecord {
     public static final String RECORD_MX = "MX";
     public static final String RECORD_CNAME = "CNAME";
     
-    private static HashMap<String, HashMap<String, Attribute>> records = new HashMap<String, HashMap<String, Attribute>>();
+    private static HashMap<String, HashMap<String, Attribute>> records 
+    	= new HashMap<String, HashMap<String, Attribute>>();
     
-    // TODO: no net will result in socket exception which is not catched, yet!
     public static Vector<String> lookup(String hostName, String record) {
     	Vector<String> result = new Vector<String>();
     	try {
@@ -37,7 +37,8 @@ public class DomainRecord {
     					result.add((String) recordEntryAttributeEnumeration.next());
     				}
     				// local lookup for both hostname and attribute was successful
-    				System.out.println("Local lookup for both " + record + " and " + hostName + " was successful.");
+    				System.out.println("Local lookup for the " + record + " for " 
+    						+ hostName + " was successful. " + result.toString());
     				return result;
     			}
 				// the attribute could not be found for a known hostname
@@ -50,7 +51,8 @@ public class DomainRecord {
         				result.add((String) resultEnumeration.next());
         			}
         			// local lookup for hostname was succesful, but attribute was not known yet
-    				System.out.println("Local lookup for " + hostName + " was successful, but the attribute " + record + " was not found.");
+    				System.out.println("Local lookup for " + hostName + " was successful, but the attribute " 
+    						+ record + " required remote lookup. " + result.toString());
     				return result;
     			}
     		}
@@ -68,13 +70,16 @@ public class DomainRecord {
     				result.add((String) resultEnumeration.next());
     			}
     			// be talkative!
-				System.out.println("Required remote lookup for " + record + " at " + hostName + ".");
+				System.out.println("Required remote lookup for " + record + " at " 
+						+ hostName + ". " + result.toString());
     			return result;
     		}
     	} catch (NamingException e) {
-    		System.out.println("No DNS name found for " + hostName + " and attribute " + record);
+    		System.out.println("No DNS name found for " + hostName + " and attribute " 
+    				+ record + ". " + result.toString());
     	} catch (NullPointerException e) {
-    		System.out.println("The attribute " + record + " is unknown to the server " + hostName);
+    		System.out.println("The attribute " + record + " is unknown to the server " 
+    				+ hostName + ". " + result.toString());
     	}
 		return result;
     }
