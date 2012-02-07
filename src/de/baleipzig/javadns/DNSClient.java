@@ -7,7 +7,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
@@ -31,7 +35,8 @@ import javax.swing.event.ChangeListener;
 
 @SuppressWarnings("serial")
 public class DNSClient extends JFrame {
-	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	private static final String LINE_SEPARATOR = System
+			.getProperty("line.separator");
 	private static final String RB_A_LABEL = "A (IPv4)";
 	private JTextField txfName;
 	private JTextArea textArea;
@@ -39,6 +44,7 @@ public class DNSClient extends JFrame {
 	private JComboBox cmbxOTHER;
 	private final ButtonGroup btngrpRecordType = new ButtonGroup();
 	private JTextField txfDnsPort;
+	private final String REQUEST_SEPARATOR = ",";
 
 	public DNSClient() {
 		setMinimumSize(new Dimension(600, 500));
@@ -225,7 +231,11 @@ public class DNSClient extends JFrame {
 		panel.add(rdbtnOTHER, gbc_rdbtnOTHER);
 
 		cmbxOTHER = new JComboBox();
-		cmbxOTHER.setModel(new DefaultComboBoxModel(new String[] {"AFSDB", "APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY", "DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3", "NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV", "SSHFP", "TA", "TKEY", "TSIG"}));
+		cmbxOTHER.setModel(new DefaultComboBoxModel(new String[] { "AFSDB",
+				"APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY",
+				"DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3",
+				"NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV",
+				"SSHFP", "TA", "TKEY", "TSIG" }));
 		cmbxOTHER.setEnabled(false);
 		GridBagConstraints gbc_txfOTHER = new GridBagConstraints();
 		gbc_txfOTHER.insets = new Insets(0, 0, 5, 0);
@@ -242,17 +252,21 @@ public class DNSClient extends JFrame {
 				try {
 					dnsPort = Integer.parseInt(txfDnsPort.getText());
 				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(null, "The port must be a number!","Input error",JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null,
+							"The port must be a number!", "Input error",
+							JOptionPane.ERROR_MESSAGE);
 					txfDnsPort.requestFocus();
 					txfDnsPort.selectAll();
 					return;
 				}
 				String lookupName = txfName.getText();
 				JRadioButton selectedButton = null;
-				Enumeration<AbstractButton> elements = btngrpRecordType.getElements();
+				Enumeration<AbstractButton> elements = btngrpRecordType
+						.getElements();
 				while (elements.hasMoreElements()) {
 					AbstractButton nextElement = elements.nextElement();
-					if (nextElement instanceof JRadioButton && nextElement.isSelected()) {
+					if (nextElement instanceof JRadioButton
+							&& nextElement.isSelected()) {
 						selectedButton = (JRadioButton) nextElement;
 					}
 				}
@@ -261,10 +275,56 @@ public class DNSClient extends JFrame {
 					if (recordType.equals(rdbtnOTHER.getActionCommand())) {
 						recordType = cmbxOTHER.getSelectedItem().toString();
 					}
-					// FIXME: Debug output
-					textArea.append("Requesting "+recordType+" for "+lookupName+" from "+dnsAddress+":"+dnsPort+LINE_SEPARATOR);
-					// TODO: Perform Lookup
-					//Socket socket = new Socket(dnsAddress, arg1)
+					textArea.append("Requesting " + recordType + " for "
+							+ lookupName + " from " + dnsAddress + ":"
+							+ dnsPort + LINE_SEPARATOR);
+					Socket socket = null;
+					try {
+						socket = new Socket(dnsAddress, dnsPort);
+					} catch (UnknownHostException e) {
+						JOptionPane.showMessageDialog(null, e.getMessage(),
+								"Host unknown", JOptionPane.ERROR_MESSAGE);
+						return;
+					} catch (IOException e) {
+						JOptionPane.showMessageDialog(null, e.getMessage(),
+								"IO Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					try {
+						BufferedOutputStream bos = new BufferedOutputStream(
+								socket.getOutputStream());
+						// build request string
+						StringBuilder builder = new StringBuilder(lookupName);
+						builder.append(REQUEST_SEPARATOR);
+						builder.append(recordType);
+						// send request
+						bos.write(builder.toString().getBytes());
+						bos.flush();
+						bos.close();
+
+						// read response
+						BufferedInputStream bis = new BufferedInputStream(
+								socket.getInputStream());
+						byte[] responseBytes = new byte[4096]; // hopefully 4k are enough
+						int bytesRead = 0;
+						String response = null;
+						while ((bytesRead = bis.read(responseBytes)) != -1) {
+							response = new String(responseBytes, 0, bytesRead);
+						}
+						if (response != null) {
+							// show response in log area
+							textArea.append(response);
+						}
+					} catch (IOException e) {
+						JOptionPane.showMessageDialog(null, e.getMessage(),
+								"IO Error", JOptionPane.ERROR_MESSAGE);
+					} finally {
+						try {
+							socket.close();
+						} catch (Exception e) {
+						}
+					}
+
 				}
 			}
 		});
@@ -274,7 +334,7 @@ public class DNSClient extends JFrame {
 		gbc_btnStartLookup.gridx = 1;
 		gbc_btnStartLookup.gridy = 7;
 		panel.add(btnStartLookup, gbc_btnStartLookup);
-		
+
 		JButton btnResetServer = new JButton("Reset Server");
 		btnResetServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -295,7 +355,7 @@ public class DNSClient extends JFrame {
 		gbc_lblResponse.gridx = 0;
 		gbc_lblResponse.gridy = 9;
 		panel.add(lblResponse, gbc_lblResponse);
-		
+
 		JScrollPane scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
