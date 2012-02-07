@@ -22,6 +22,8 @@ import javax.swing.border.EmptyBorder;
 public class DNSClient extends JFrame {
 	private JTextField txfName;
 	private JTextArea textArea;
+	private JTextField txfDns;
+
 	public DNSClient() {
 		setMinimumSize(new Dimension(400, 400));
 		setTitle("DNS Client");
@@ -30,44 +32,62 @@ public class DNSClient extends JFrame {
 		} catch (Exception e) {
 			// simply ignore if it doesn't work
 		}
-		
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
-		
+
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{0, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.columnWidths = new int[] { 0, 0, 0 };
+		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gbl_panel.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0,
+				Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
-		
+
+		JLabel lblDns = new JLabel("DNS:");
+		GridBagConstraints gbc_lblDns = new GridBagConstraints();
+		gbc_lblDns.anchor = GridBagConstraints.EAST;
+		gbc_lblDns.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDns.gridx = 0;
+		gbc_lblDns.gridy = 0;
+		panel.add(lblDns, gbc_lblDns);
+
+		txfDns = new JTextField();
+		GridBagConstraints gbc_txfDns = new GridBagConstraints();
+		gbc_txfDns.insets = new Insets(0, 0, 5, 0);
+		gbc_txfDns.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txfDns.gridx = 1;
+		gbc_txfDns.gridy = 0;
+		panel.add(txfDns, gbc_txfDns);
+		txfDns.setColumns(10);
+
 		JLabel lblName = new JLabel("Name:");
 		GridBagConstraints gbc_lblName = new GridBagConstraints();
 		gbc_lblName.insets = new Insets(0, 0, 5, 5);
 		gbc_lblName.anchor = GridBagConstraints.EAST;
 		gbc_lblName.gridx = 0;
-		gbc_lblName.gridy = 0;
+		gbc_lblName.gridy = 1;
 		panel.add(lblName, gbc_lblName);
-		
+
 		txfName = new JTextField();
-		txfName.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_txfName = new GridBagConstraints();
 		gbc_txfName.insets = new Insets(0, 0, 5, 0);
 		gbc_txfName.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txfName.gridx = 1;
-		gbc_txfName.gridy = 0;
+		gbc_txfName.gridy = 1;
 		panel.add(txfName, gbc_txfName);
 		txfName.setColumns(10);
-		
+
 		JButton btnStartLookup = new JButton("Start Lookup");
 		btnStartLookup.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				textArea.setText("");
-				String name = txfName.getText();
-				textArea.append("Looking up "+name);
+				String dnsAddress = txfDns.getText();
+				String lookupName = txfName.getText();
+				textArea.append("Looking up " + lookupName);
 				// TODO: Perform Lookup
 			}
 		});
@@ -75,35 +95,36 @@ public class DNSClient extends JFrame {
 		gbc_btnStartLookup.insets = new Insets(0, 0, 5, 0);
 		gbc_btnStartLookup.anchor = GridBagConstraints.EAST;
 		gbc_btnStartLookup.gridx = 1;
-		gbc_btnStartLookup.gridy = 1;
+		gbc_btnStartLookup.gridy = 2;
 		panel.add(btnStartLookup, gbc_btnStartLookup);
-		
+
 		JLabel lblResponse = new JLabel("Response:");
 		GridBagConstraints gbc_lblResponse = new GridBagConstraints();
 		gbc_lblResponse.anchor = GridBagConstraints.NORTH;
 		gbc_lblResponse.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResponse.gridx = 0;
-		gbc_lblResponse.gridy = 2;
+		gbc_lblResponse.gridy = 3;
 		panel.add(lblResponse, gbc_lblResponse);
-		
+
 		textArea = new JTextArea();
 		textArea.setEditable(false);
-		textArea.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		textArea.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
+				null, null));
 		GridBagConstraints gbc_textArea = new GridBagConstraints();
 		gbc_textArea.fill = GridBagConstraints.BOTH;
 		gbc_textArea.gridx = 1;
-		gbc_textArea.gridy = 2;
+		gbc_textArea.gridy = 3;
 		panel.add(textArea, gbc_textArea);
-		
+
 		JLabel lblStatus = new JLabel("Some status label");
 		getContentPane().add(lblStatus, BorderLayout.SOUTH);
-		
-		//center on screen
+
+		// center on screen
 		setLocationRelativeTo(null);
 		// show frame
 		setVisible(true);
 	}
-	
+
 	public static void main(String[] args) {
 		new DNSClient();
 	}
