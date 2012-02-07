@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.Socket;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
@@ -16,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -236,7 +238,15 @@ public class DNSClient extends JFrame {
 		btnStartLookup.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String dnsAddress = txfDnsIP.getText();
-				String dnsPort = txfDnsPort.getText();
+				int dnsPort;
+				try {
+					dnsPort = Integer.parseInt(txfDnsPort.getText());
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(null, "The port must be a number!","Input error",JOptionPane.ERROR_MESSAGE);
+					txfDnsPort.requestFocus();
+					txfDnsPort.selectAll();
+					return;
+				}
 				String lookupName = txfName.getText();
 				JRadioButton selectedButton = null;
 				Enumeration<AbstractButton> elements = btngrpRecordType.getElements();
@@ -254,6 +264,7 @@ public class DNSClient extends JFrame {
 					// FIXME: Debug output
 					textArea.append("Requesting "+recordType+" for "+lookupName+" from "+dnsAddress+":"+dnsPort+LINE_SEPARATOR);
 					// TODO: Perform Lookup
+					//Socket socket = new Socket(dnsAddress, arg1)
 				}
 			}
 		});
