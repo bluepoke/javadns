@@ -8,9 +8,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
@@ -42,7 +42,7 @@ public class DNSClient extends JFrame {
 	private JTextField txfName;
 	private JTextArea textArea;
 	private JTextField txfDnsIP;
-	private JComboBox<String> cmbxOTHER;
+	private JComboBox cmbxOTHER;
 	private final ButtonGroup btngrpRecordType = new ButtonGroup();
 	private JTextField txfDnsPort;
 	private final String REQUEST_SEPARATOR = ",";
@@ -237,8 +237,8 @@ public class DNSClient extends JFrame {
 		gbc_rdbtnOTHER.gridy = 6;
 		panel.add(rdbtnOTHER, gbc_rdbtnOTHER);
 
-		cmbxOTHER = new JComboBox<String>();
-		cmbxOTHER.setModel(new DefaultComboBoxModel<String>(new String[] { "AFSDB",
+		cmbxOTHER = new JComboBox();
+		cmbxOTHER.setModel(new DefaultComboBoxModel(new String[] { "AFSDB",
 				"APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY",
 				"DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3",
 				"NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV",
@@ -298,30 +298,31 @@ public class DNSClient extends JFrame {
 						return;
 					}
 					try {
-						BufferedOutputStream bos = new BufferedOutputStream(
+						ObjectOutputStream oos = new ObjectOutputStream(
 								socket.getOutputStream());
 						// build request string
 						StringBuilder builder = new StringBuilder(lookupName);
 						builder.append(REQUEST_SEPARATOR);
 						builder.append(recordType);
 						// send request
-						bos.write(builder.toString().getBytes());
-						bos.flush();
-						bos.close();
-
+						oos.writeObject(builder.toString());
+						oos.flush();
+						
 						// read response
-						BufferedInputStream bis = new BufferedInputStream(
+						ObjectInputStream ois = new ObjectInputStream(
 								socket.getInputStream());
-						byte[] responseBytes = new byte[4096]; // hopefully 4k are enough
-						int bytesRead = 0;
-						String response = null;
-						while ((bytesRead = bis.read(responseBytes)) != -1) {
-							response = new String(responseBytes, 0, bytesRead);
+						String response;
+						try {
+							response = (String) ois.readObject();
+							if (response != null) {
+								// show response in log area
+								textArea.append(response);
+							}
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							JOptionPane.showMessageDialog(null, e.getMessage(), "The server sent rubbish", JOptionPane.ERROR_MESSAGE);
 						}
-						if (response != null) {
-							// show response in log area
-							textArea.append(response);
-						}
+						
 					} catch (IOException e) {
 						JOptionPane.showMessageDialog(null, e.getMessage(),
 								"IO Error", JOptionPane.ERROR_MESSAGE);
