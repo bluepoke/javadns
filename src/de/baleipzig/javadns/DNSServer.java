@@ -52,12 +52,14 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.border.BevelBorder;
 
 @SuppressWarnings("serial")
 public class DNSServer extends JFrame {
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static int DEFAULT_PORT = 53;
 	private JTextArea logTextArea;
+	private JButton btnStartServer, btnStopServer;
 	private JTextField txfPort;
 	private ServerWorker serverWorker;
 
@@ -90,13 +92,19 @@ public class DNSServer extends JFrame {
 		
 		logTextArea = new JTextArea();
 		logTextArea.setEditable(false);
+		logTextArea.setLineWrap(true);
+		logTextArea.setWrapStyleWord(true);
 		logScrollPane.setViewportView(logTextArea);
+		logTextArea.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
+				null, null));
 		
 		JScrollPane treeScrollPane = new JScrollPane();
 		splitPane.setRightComponent(treeScrollPane);
 		
 		JTree recordTree = new JTree();
 		treeScrollPane.setViewportView(recordTree);
+		recordTree.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
+				null, null));
 		
 		JPanel panel = new JPanel();
 		getContentPane().add(panel, BorderLayout.NORTH);
@@ -110,7 +118,7 @@ public class DNSServer extends JFrame {
 		panel.add(txfPort);
 		txfPort.setColumns(10);
 		
-		JButton btnStartServer = new JButton("Start Server");
+		btnStartServer = new JButton("Start Server");
 		btnStartServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (serverWorker != null) {
@@ -118,7 +126,7 @@ public class DNSServer extends JFrame {
 						serverWorker.stop();
 					}
 					else if (!serverWorker.isDone()) {
-						logTextArea.append("Still stopping server..."+LINE_SEPARATOR);
+						appendText("Still stopping server..."+LINE_SEPARATOR);
 					}
 					else {
 						start();
@@ -129,7 +137,8 @@ public class DNSServer extends JFrame {
 		});
 		panel.add(btnStartServer);
 		
-		JButton btnStopServer = new JButton("Stop Server");
+		btnStopServer = new JButton("Stop Server");
+		btnStopServer.setEnabled(false);
 		btnStopServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent paramActionEvent) {
 				if (serverWorker != null) {
@@ -137,7 +146,7 @@ public class DNSServer extends JFrame {
 						serverWorker.stop();
 					}
 					else if (!serverWorker.isDone()) {
-						logTextArea.append("Still stopping server..."+LINE_SEPARATOR);
+						appendText("Still stopping server..."+LINE_SEPARATOR);
 					}
 					else {
 						serverWorker = null;
@@ -164,13 +173,18 @@ public class DNSServer extends JFrame {
 	}
 	
 	private void start() {
+		btnStartServer.setEnabled(false);
+		btnStopServer.setEnabled(true);
 		int port = Integer.parseInt(txfPort.getText());
 		serverWorker = new ServerWorker(port);
 		serverWorker.execute();
 	}
-	/**
-	 * @param args
-	 */
+	
+	private void appendText(String text) {
+		logTextArea.append(text + LINE_SEPARATOR);
+		logTextArea.setCaretPosition(logTextArea.getText().length());
+	}
+
 	public static void main(String[] args) {
 		DNSServer server = new DNSServer("DNS Server");
 		server.setLocationRelativeTo(null);
@@ -190,7 +204,7 @@ public class DNSServer extends JFrame {
 		
 		@Override
 		protected Object doInBackground() throws Exception {
-			logTextArea.append("Server listening at port "+port+LINE_SEPARATOR);
+			appendText("Server listening at port "+port+LINE_SEPARATOR);
 			ServerSocket serverSocket = new ServerSocket(port);
 			serverSocket.setSoTimeout(5000); // timeout 5s
 			while (isRunning) {
@@ -200,17 +214,19 @@ public class DNSServer extends JFrame {
 					new RequestThread(clientSocket).run();
 					
 				} catch (SocketTimeoutException e) {
-					//logTextArea.append("Timeout exceeded."+LINE_SEPARATOR);
+					//appendText("Timeout exceeded."+LINE_SEPARATOR);
 				}
 
 			}
 			serverSocket.close();
-			logTextArea.append("Server stopped."+LINE_SEPARATOR);
+			appendText("Server stopped."+LINE_SEPARATOR);
+			btnStartServer.setEnabled(true);
 			return null;
 		}		
 		
 		public void stop() {
-			logTextArea.append("Stopping server..."+LINE_SEPARATOR);
+			appendText("Stopping server..."+LINE_SEPARATOR);
+			btnStopServer.setEnabled(false);
 			isRunning = false;
 		}
 		
@@ -230,26 +246,24 @@ public class DNSServer extends JFrame {
 		public void run() {
 			try {
 				// read request
-				logTextArea.append("Connection from "
-						+ socket.getInetAddress().getHostAddress()
-						+ LINE_SEPARATOR);
+				appendText("Connection from " + socket.getInetAddress().getHostAddress());
 				ObjectInputStream ois = new ObjectInputStream(
 						socket.getInputStream());
 				String requestString = (String) ois.readObject();
-				logTextArea.append("Request is: " + requestString
-						+ LINE_SEPARATOR);
+				appendText("Request is: " + requestString);
 				// split request
 				String[] split = requestString.split(REQUEST_SEPARATOR);
 				String host = split[0];
 				String record = split[1];
 				// perform lookup
 				DomainRecordMessage responseMessage = lookup(host, record);
-				logTextArea.append("Lookup result is: " + responseMessage
+				appendText("Lookup result is: " + LINE_SEPARATOR + responseMessage
 						+ LINE_SEPARATOR);
 				// send response
 				ObjectOutputStream oos = new ObjectOutputStream(
 						socket.getOutputStream());
-				oos.writeObject(responseMessage.toString());
+				String response = responseMessage.getDnsResult().toString();
+				oos.writeObject(response.substring(1, response.length() - 1));
 				oos.flush();
 				oos.close();
 				socket.close();

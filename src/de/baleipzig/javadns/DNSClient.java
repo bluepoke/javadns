@@ -7,7 +7,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -57,12 +56,6 @@ public class DNSClient extends JFrame {
 		}
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		addWindowListener(new java.awt.event.WindowAdapter() {
-		    public void windowClosing(WindowEvent winEvt) {
-		        closeConnections();
-		        System.exit(0); 
-		    }
-		});
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		JPanel panel = new JPanel();
@@ -282,9 +275,9 @@ public class DNSClient extends JFrame {
 					if (recordType.equals(rdbtnOTHER.getActionCommand())) {
 						recordType = cmbxOTHER.getSelectedItem().toString();
 					}
-					textArea.append("Requesting " + recordType + " for "
+					appendText("Requesting " + recordType + " for "
 							+ lookupName + " from " + dnsAddress + ":"
-							+ dnsPort + LINE_SEPARATOR);
+							+ dnsPort);
 					Socket socket = null;
 					try {
 						socket = new Socket(dnsAddress, dnsPort);
@@ -316,10 +309,9 @@ public class DNSClient extends JFrame {
 							response = (String) ois.readObject();
 							if (response != null) {
 								// show response in log area
-								textArea.append(response);
+								appendText(response + LINE_SEPARATOR);
 							}
 						} catch (ClassNotFoundException e) {
-							// TODO Auto-generated catch block
 							JOptionPane.showMessageDialog(null, e.getMessage(), "The server sent rubbish", JOptionPane.ERROR_MESSAGE);
 						}
 						
@@ -373,8 +365,10 @@ public class DNSClient extends JFrame {
 		panel.add(scrollPane, gbc_scrollPane);
 
 		textArea = new JTextArea();
-		scrollPane.setViewportView(textArea);
 		textArea.setEditable(false);
+		textArea.setLineWrap(true);
+		textArea.setWrapStyleWord(true);
+		scrollPane.setViewportView(textArea);
 		textArea.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
 				null, null));
 
@@ -387,11 +381,11 @@ public class DNSClient extends JFrame {
 		setVisible(true);
 	}
 
-	protected void closeConnections() {
-		// TODO close all open connections and sockets
-		
+	private void appendText(String text) {
+		textArea.append(text + LINE_SEPARATOR);
+		textArea.setCaretPosition(textArea.getText().length());
 	}
-
+	
 	public static void main(String[] args) {
 		new DNSClient();
 	}
