@@ -338,7 +338,10 @@ public class DNSClient extends JFrame {
 							response = (String) ois.readObject();
 							if (response != null) {
 								// show response in log area
-								appendText(response + LINE_SEPARATOR);
+								if (response.isEmpty())
+									appendText("The result was empty or there was no result at all." + LINE_SEPARATOR);
+								else
+									appendText(response + LINE_SEPARATOR);
 							}
 						} catch (ClassNotFoundException e) {
 							JOptionPane.showMessageDialog(null, e.getMessage(), "The server sent rubbish", JOptionPane.ERROR_MESSAGE);
