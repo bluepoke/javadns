@@ -61,11 +61,6 @@ public class DNSServer extends JFrame {
 	private JTextField txfPort;
 	private ServerWorker serverWorker;
 
-	
-	private void addLog(String log) {
-		logTextArea.append(log);
-	}
-
 	public DNSServer(String title) {
 		setMinimumSize(new Dimension(600, 500));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -111,14 +106,25 @@ public class DNSServer extends JFrame {
 		panel.add(lblPort);
 		
 		txfPort = new JTextField();
-		txfPort.setText("53");
+		txfPort.setText(String.valueOf(DEFAULT_PORT));
 		panel.add(txfPort);
 		txfPort.setColumns(10);
 		
 		JButton btnStartServer = new JButton("Start Server");
 		btnStartServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				start();
+				if (serverWorker != null) {
+					if (serverWorker.isRunning) {
+						serverWorker.stop();
+					}
+					else if (!serverWorker.isDone()) {
+						logTextArea.append("Still stopping server..."+LINE_SEPARATOR);
+					}
+					else {
+						start();
+					}
+				}
+				else start();
 			}
 		});
 		panel.add(btnStartServer);
@@ -130,6 +136,12 @@ public class DNSServer extends JFrame {
 					if (serverWorker.isRunning) {
 						serverWorker.stop();
 					}
+					else if (!serverWorker.isDone()) {
+						logTextArea.append("Still stopping server..."+LINE_SEPARATOR);
+					}
+					else {
+						serverWorker = null;
+					}
 				} 
 			}
 		});
@@ -137,8 +149,14 @@ public class DNSServer extends JFrame {
 	}
 
 	protected void closeConnections() {
-		// TODO close all open connections and sockets
-		
+		if (serverWorker != null) {
+			if (serverWorker.isRunning) {
+				serverWorker.stop();
+			}
+			while(!serverWorker.isDone()) {
+				// wait for it
+			}
+		}
 	}
 
 	protected static DomainRecordMessage lookup(String hostName, String recordType) {
@@ -150,7 +168,6 @@ public class DNSServer extends JFrame {
 		serverWorker = new ServerWorker(port);
 		serverWorker.execute();
 	}
-	
 	/**
 	 * @param args
 	 */
@@ -158,17 +175,6 @@ public class DNSServer extends JFrame {
 		DNSServer server = new DNSServer("DNS Server");
 		server.setLocationRelativeTo(null);
 		server.setVisible(true);
-		
-//		System.out.println(lookup("google.de", "A"));
-//		System.out.println(lookup("heise.de", "AAAA"));
-//		System.out.println(lookup("google.com", "RP"));
-//		System.out.println(lookup("google.com", "A"));
-//		System.out.println(lookup("eveonline.com", "A"));
-//		System.out.println(lookup("eveonline.com", "NS"));
-//		System.out.println(lookup("hhrhere.com", "A"));
-//		System.out.println(lookup("hhrhere.com", "NS"));
-//		System.out.println(lookup("heise.de", "TXT"));
-//		System.out.println(lookup("heise.de", "A"));
 	}
 	
 	private class ServerWorker extends SwingWorker<Object, Object> {
@@ -198,9 +204,10 @@ public class DNSServer extends JFrame {
 				}
 
 			}
+			serverSocket.close();
 			logTextArea.append("Server stopped."+LINE_SEPARATOR);
 			return null;
-		}
+		}		
 		
 		public void stop() {
 			logTextArea.append("Stopping server..."+LINE_SEPARATOR);
