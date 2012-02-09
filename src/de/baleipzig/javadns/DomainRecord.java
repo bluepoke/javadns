@@ -37,11 +37,19 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
 public class DomainRecord {
     
+	private static final String[] recordTypes = new String[] { 
+		"A", "AAAA", "LOC", "MX", "NS", "RP", "TXT", "AFSDB",
+		"APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY",
+		"DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3",
+		"NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV",
+		"SSHFP", "TA", "TKEY", "TSIG" };
+	
     private static HashMap<String, HashMap<String, Attribute>> records 
     	= new HashMap<String, HashMap<String, Attribute>>();
     
@@ -125,5 +133,25 @@ public class DomainRecord {
 	public static boolean reset() {
 		records.clear();
 		return true;
+	}
+	
+	private static HashMap<String, Attribute> createCompleteAttributes() {
+		HashMap<String, Attribute> attributes = new HashMap<String, Attribute>();
+		
+		for (String recordType : recordTypes) {
+			attributes.put(recordType, new BasicAttribute(recordType));
+		}
+		
+		return attributes;
+	}
+	
+	public HashMap<String, Attribute> addRecord(String desiredHostName, HashMap<String, Attribute> desiredAttributes) {
+		HashMap<String, Attribute> attributes = createCompleteAttributes();
+		
+		for (String key : desiredAttributes.keySet()) {
+			attributes.put(key, desiredAttributes.get(key));
+		}
+		
+		return records.put(desiredHostName, attributes);
 	}
 }
