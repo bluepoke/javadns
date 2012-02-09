@@ -384,63 +384,53 @@ public class DNSClient extends JFrame implements ActionListener {
 			appendText("Requesting the server to reset its records table.");
 		}
 		
-		Socket socket = null;
-		try {
-			socket = new Socket(dnsAddress, dnsPort);
-		} catch (UnknownHostException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(),
-					"Host unknown", JOptionPane.ERROR_MESSAGE);
-			return;
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(),
-					"IO Error", JOptionPane.ERROR_MESSAGE);
-			return;
+		
+		StringBuilder builder = new StringBuilder();
+		if (evt.getActionCommand().equals(LOOKUP)) {
+			// build request string
+			builder.append(lookupName);
+			builder.append(REQUEST_SEPARATOR);
+			builder.append(recordType);
 		}
+		else if (evt.getActionCommand().equals(RESET)) {
+			builder.append(RESET);
+		}
+		
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(
-					socket.getOutputStream());
-			
-			StringBuilder builder = new StringBuilder();
-			if (evt.getActionCommand().equals(LOOKUP)) {
-				// build request string
-				builder.append(lookupName);
-				builder.append(REQUEST_SEPARATOR);
-				builder.append(recordType);
-			}
-			else if (evt.getActionCommand().equals(RESET)) {
-				builder.append(RESET);
-			}
-			// send request
-			oos.writeObject(builder.toString());
-			oos.flush();
-
-			// read response
-			ObjectInputStream ois = new ObjectInputStream(
-					socket.getInputStream());
-			String response;
-			try {
-				response = (String) ois.readObject();
-				if (response != null) {
-					// show response in log area
-					if (response.isEmpty())
-						appendText("The result was empty or there was no result at all." + LINE_SEPARATOR);
-					else
-						appendText(response + LINE_SEPARATOR);
-				}
+			String response = sendRequest(builder.toString(), dnsAddress, dnsPort);
+			if (response.isEmpty())
+				appendText("The result was empty or there was no result at all." + LINE_SEPARATOR);
+			else
+				appendText(response + LINE_SEPARATOR);
 			} catch (ClassNotFoundException e) {
 				JOptionPane.showMessageDialog(null, e.getMessage(), "The server sent rubbish", JOptionPane.ERROR_MESSAGE);
+			} catch (UnknownHostException e) {
+				JOptionPane.showMessageDialog(null, e.getMessage(),
+						"Host unknown", JOptionPane.ERROR_MESSAGE);
+				return;
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, e.getMessage(),
+						"IO Error", JOptionPane.ERROR_MESSAGE);
+				return;
 			}
+	}
+	
+	
+	private String sendRequest(String request, String targetAddress, int targetPort) throws UnknownHostException, IOException, ClassNotFoundException {
+		Socket socket = null;
+		socket = new Socket(targetAddress, targetPort);
+		ObjectOutputStream oos = new ObjectOutputStream(
+				socket.getOutputStream());
+		// send request
+		oos.writeObject(request);
+		oos.flush();
 
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(),
-					"IO Error", JOptionPane.ERROR_MESSAGE);
-		} finally {
-			try {
-				socket.close();
-			} catch (Exception e) {
-			}
-		}
-
+		// read response
+		ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+		String response;
+		response = (String) ois.readObject();
+		socket.close();
+		return response;
 	}
 
 
