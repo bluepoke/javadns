@@ -31,18 +31,23 @@ package de.baleipzig.javadns;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.HashMap;
 
+import javax.naming.directory.Attribute;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
@@ -59,15 +64,12 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 
 @SuppressWarnings("serial")
 public class DNSClient extends JFrame implements ActionListener {
 	private static final String RESET = "RESET";
 	private static final String LOOKUP = "LOOKUP";
+	private static final String REGISTER = "REGISTER";
 	private static final String LINE_SEPARATOR = System
 			.getProperty("line.separator");
 	private static final String RB_A_LABEL = "A (IPv4)";
@@ -91,17 +93,17 @@ public class DNSClient extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
-		JPanel panel = new JPanel();
-		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(panel, BorderLayout.CENTER);
-		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
-		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0,
+		JPanel pnlMainPanel = new JPanel();
+		pnlMainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(pnlMainPanel, BorderLayout.CENTER);
+		GridBagLayout gbl_pnlMainPanel = new GridBagLayout();
+		gbl_pnlMainPanel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
+		gbl_pnlMainPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_pnlMainPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0,
 				Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+		gbl_pnlMainPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0,
 				0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
-		panel.setLayout(gbl_panel);
+		pnlMainPanel.setLayout(gbl_pnlMainPanel);
 
 		JLabel lblDns = new JLabel("DNS IP:");
 		GridBagConstraints gbc_lblDns = new GridBagConstraints();
@@ -109,7 +111,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_lblDns.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDns.gridx = 0;
 		gbc_lblDns.gridy = 0;
-		panel.add(lblDns, gbc_lblDns);
+		pnlMainPanel.add(lblDns, gbc_lblDns);
 
 		txfDnsIP = new JTextField();
 		txfDnsIP.setText("127.0.0.1");
@@ -119,7 +121,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfDnsIP.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txfDnsIP.gridx = 1;
 		gbc_txfDnsIP.gridy = 0;
-		panel.add(txfDnsIP, gbc_txfDnsIP);
+		pnlMainPanel.add(txfDnsIP, gbc_txfDnsIP);
 		txfDnsIP.setColumns(10);
 
 		JLabel lblNewLabel = new JLabel("DNS Port:");
@@ -128,7 +130,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 1;
-		panel.add(lblNewLabel, gbc_lblNewLabel);
+		pnlMainPanel.add(lblNewLabel, gbc_lblNewLabel);
 
 		txfDnsPort = new JTextField();
 		txfDnsPort.setText("53");
@@ -138,7 +140,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfDnsPort.insets = new Insets(0, 0, 5, 0);
 		gbc_txfDnsPort.gridx = 1;
 		gbc_txfDnsPort.gridy = 1;
-		panel.add(txfDnsPort, gbc_txfDnsPort);
+		pnlMainPanel.add(txfDnsPort, gbc_txfDnsPort);
 		txfDnsPort.setColumns(10);
 
 		JLabel lblName = new JLabel("Name:");
@@ -147,7 +149,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_lblName.anchor = GridBagConstraints.EAST;
 		gbc_lblName.gridx = 0;
 		gbc_lblName.gridy = 2;
-		panel.add(lblName, gbc_lblName);
+		pnlMainPanel.add(lblName, gbc_lblName);
 
 		txfName = new JTextField();
 		txfName.setText("google.de");
@@ -157,7 +159,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfName.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txfName.gridx = 1;
 		gbc_txfName.gridy = 2;
-		panel.add(txfName, gbc_txfName);
+		pnlMainPanel.add(txfName, gbc_txfName);
 		txfName.setColumns(10);
 
 		JLabel lblRequestType = new JLabel("Record Type:");
@@ -166,7 +168,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_lblRequestType.insets = new Insets(0, 0, 5, 5);
 		gbc_lblRequestType.gridx = 0;
 		gbc_lblRequestType.gridy = 3;
-		panel.add(lblRequestType, gbc_lblRequestType);
+		pnlMainPanel.add(lblRequestType, gbc_lblRequestType);
 
 		JRadioButton rdbtnA = new JRadioButton(RB_A_LABEL);
 		rdbtnA.setActionCommand("A");
@@ -178,7 +180,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnA.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnA.gridx = 1;
 		gbc_rdbtnA.gridy = 3;
-		panel.add(rdbtnA, gbc_rdbtnA);
+		pnlMainPanel.add(rdbtnA, gbc_rdbtnA);
 
 		JRadioButton rdbtnNS = new JRadioButton("NS (name server)");
 		rdbtnNS.setActionCommand("NS");
@@ -189,7 +191,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnNS.insets = new Insets(0, 0, 5, 0);
 		gbc_rdbtnNS.gridx = 2;
 		gbc_rdbtnNS.gridy = 3;
-		panel.add(rdbtnNS, gbc_rdbtnNS);
+		pnlMainPanel.add(rdbtnNS, gbc_rdbtnNS);
 
 		JRadioButton rdbtnAAAA = new JRadioButton("AAAA (IPv6)");
 		rdbtnAAAA.setActionCommand("AAAA");
@@ -199,7 +201,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnAAAA.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnAAAA.gridx = 1;
 		gbc_rdbtnAAAA.gridy = 4;
-		panel.add(rdbtnAAAA, gbc_rdbtnAAAA);
+		pnlMainPanel.add(rdbtnAAAA, gbc_rdbtnAAAA);
 
 		JRadioButton rdbtnRP = new JRadioButton("RP (responsible person)");
 		rdbtnRP.setActionCommand("RP");
@@ -210,7 +212,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnRP.insets = new Insets(0, 0, 5, 0);
 		gbc_rdbtnRP.gridx = 2;
 		gbc_rdbtnRP.gridy = 4;
-		panel.add(rdbtnRP, gbc_rdbtnRP);
+		pnlMainPanel.add(rdbtnRP, gbc_rdbtnRP);
 
 		JRadioButton rdbtnLOC = new JRadioButton("LOC (geographical location)");
 		rdbtnLOC.setActionCommand("LOC");
@@ -220,7 +222,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnLOC.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnLOC.gridx = 1;
 		gbc_rdbtnLOC.gridy = 5;
-		panel.add(rdbtnLOC, gbc_rdbtnLOC);
+		pnlMainPanel.add(rdbtnLOC, gbc_rdbtnLOC);
 
 		JRadioButton rdbtnTXT = new JRadioButton("TXT (text)");
 		rdbtnTXT.setActionCommand("TXT");
@@ -231,7 +233,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnTXT.insets = new Insets(0, 0, 5, 0);
 		gbc_rdbtnTXT.gridx = 2;
 		gbc_rdbtnTXT.gridy = 5;
-		panel.add(rdbtnTXT, gbc_rdbtnTXT);
+		pnlMainPanel.add(rdbtnTXT, gbc_rdbtnTXT);
 
 		JRadioButton rdbtnMX = new JRadioButton("MX (mail exchange)");
 		rdbtnMX.setActionCommand("MX");
@@ -241,7 +243,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnMX.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnMX.gridx = 1;
 		gbc_rdbtnMX.gridy = 6;
-		panel.add(rdbtnMX, gbc_rdbtnMX);
+		pnlMainPanel.add(rdbtnMX, gbc_rdbtnMX);
 
 		rdbtnOTHER = new JRadioButton("other:");
 		rdbtnOTHER.setActionCommand("OTHER");
@@ -252,7 +254,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_rdbtnOTHER.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnOTHER.gridx = 2;
 		gbc_rdbtnOTHER.gridy = 6;
-		panel.add(rdbtnOTHER, gbc_rdbtnOTHER);
+		pnlMainPanel.add(rdbtnOTHER, gbc_rdbtnOTHER);
 
 		cmbxOTHER = new JComboBox();
 		cmbxOTHER.addFocusListener(new FocusAdapter() {
@@ -271,45 +273,50 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfOTHER.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txfOTHER.gridx = 3;
 		gbc_txfOTHER.gridy = 6;
-		panel.add(cmbxOTHER, gbc_txfOTHER);
+		pnlMainPanel.add(cmbxOTHER, gbc_txfOTHER);
+
+		JPanel pnlButtonPanel = new JPanel();
+		GridBagConstraints gbc_pnlButtonPanel = new GridBagConstraints();
+		gbc_pnlButtonPanel.anchor = GridBagConstraints.WEST;
+		gbc_pnlButtonPanel.gridwidth = 3;
+		gbc_pnlButtonPanel.fill = GridBagConstraints.VERTICAL;
+		gbc_pnlButtonPanel.insets = new Insets(0, 0, 5, 5);
+		gbc_pnlButtonPanel.gridx = 1;
+		gbc_pnlButtonPanel.gridy = 7;
+		pnlMainPanel.add(pnlButtonPanel, gbc_pnlButtonPanel);
+		pnlButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
 		JButton btnStartLookup = new JButton("Start Lookup");
+		pnlButtonPanel.add(btnStartLookup);
 		btnStartLookup.setActionCommand(LOOKUP);
-		btnStartLookup.addActionListener(this);
-
-		GridBagConstraints gbc_btnStartLookup = new GridBagConstraints();
-		gbc_btnStartLookup.insets = new Insets(0, 0, 5, 5);
-		gbc_btnStartLookup.anchor = GridBagConstraints.WEST;
-		gbc_btnStartLookup.gridx = 1;
-		gbc_btnStartLookup.gridy = 7;
-		panel.add(btnStartLookup, gbc_btnStartLookup);
 
 		JButton btnResetServer = new JButton("Reset Server");
+		pnlButtonPanel.add(btnResetServer);
 		btnResetServer.setActionCommand(RESET);
-		btnResetServer.addActionListener(this);
 
-		GridBagConstraints gbc_btnResetServer = new GridBagConstraints();
-		gbc_btnResetServer.anchor = GridBagConstraints.WEST;
-		gbc_btnResetServer.insets = new Insets(0, 0, 5, 5);
-		gbc_btnResetServer.gridx = 1;
-		gbc_btnResetServer.gridy = 8;
-		panel.add(btnResetServer, gbc_btnResetServer);
+		JButton btnRegister = new JButton("Register");
+		btnRegister.setActionCommand(REGISTER);
+		btnRegister.addActionListener(this);
+		
+		pnlButtonPanel.add(btnRegister);
+		btnResetServer.addActionListener(this);
+		btnStartLookup.addActionListener(this);
 
 		JLabel lblResponse = new JLabel("Log:");
 		GridBagConstraints gbc_lblResponse = new GridBagConstraints();
 		gbc_lblResponse.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblResponse.insets = new Insets(0, 0, 0, 5);
 		gbc_lblResponse.gridx = 0;
-		gbc_lblResponse.gridy = 9;
-		panel.add(lblResponse, gbc_lblResponse);
+		gbc_lblResponse.gridy = 8;
+		pnlMainPanel.add(lblResponse, gbc_lblResponse);
 
 		JScrollPane scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridwidth = 3;
 		gbc_scrollPane.gridx = 1;
-		gbc_scrollPane.gridy = 9;
-		panel.add(scrollPane, gbc_scrollPane);
+		gbc_scrollPane.gridy = 8;
+		pnlMainPanel.add(scrollPane, gbc_scrollPane);
 
 		textArea = new JTextArea();
 		textArea.setEditable(false);
@@ -332,7 +339,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		textArea.append(text + LINE_SEPARATOR);
 		textArea.setCaretPosition(textArea.getText().length());
 	}
-	
+
 	public static void main(String[] args) {
 		new DNSClient();
 	}
@@ -344,19 +351,20 @@ public class DNSClient extends JFrame implements ActionListener {
 		try {
 			dnsPort = Integer.parseInt(txfDnsPort.getText());
 		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null,
-					"The port must be a number!", "Input error",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "The port must be a number!",
+					"Input error", JOptionPane.ERROR_MESSAGE);
 			txfDnsPort.requestFocus();
 			txfDnsPort.selectAll();
 			return;
 		}
-		
+
 		String recordType = "";
-		String lookupName = "";
-		
+		String lookupName = txfName.getText();
+
+		// create request
+		Request request = null;
 		if (evt.getActionCommand().equals(LOOKUP)) {
-			lookupName = txfName.getText();
+			// find selected button and get record type
 			JRadioButton selectedButton = null;
 			Enumeration<AbstractButton> elements = btngrpRecordType
 					.getElements();
@@ -372,44 +380,52 @@ public class DNSClient extends JFrame implements ActionListener {
 				if (recordType.equals(rdbtnOTHER.getActionCommand())) {
 					recordType = cmbxOTHER.getSelectedItem().toString();
 				}
-				appendText("Requesting " + recordType + " for "
-						+ lookupName + " from " + dnsAddress + ":"
-						+ dnsPort);
+				appendText(">> Requesting " + recordType + " for " + lookupName
+						+ " from " + dnsAddress + ":" + dnsPort);
+			}
+			request = new Request(lookupName, recordType);
+		} else if (evt.getActionCommand().equals(RESET)) {
+			request = new Request();
+			appendText(">> Requesting the server to reset its records table.");
+		} else if (evt.getActionCommand().equals(REGISTER)) {
+			RegisterDialog dialog = new RegisterDialog();
+			dialog.setVisible(true);
+			if (dialog.getButtonClicked() == RegisterDialog.OK) {
+				String hostName = dialog.getHostName();
+				HashMap<String,Attribute> map = dialog.getAttributes();
+				request = new Request(hostName, map);
+				appendText(">> Registering at server as "+hostName);
+				appendText(">> Attributes:");
+				for (String key : map.keySet()) {
+					appendText(">> "+map.get(key));
+				}
 			}
 		}
-		else if (evt.getActionCommand().equals(RESET)) {
-			appendText("Requesting the server to reset its records table.");
-		}
-		
-		Request request = null;
-		if (evt.getActionCommand().equals(LOOKUP)) {
-			request = new Request(lookupName, recordType); 
-		}
-		else if (evt.getActionCommand().equals(RESET)) {
-			request = new Request();
-		}
-		
+
 		try {
 			String response = sendRequest(request, dnsAddress, dnsPort);
 			if (response.isEmpty())
-				appendText("The result was empty or there was no result at all." + LINE_SEPARATOR);
+				appendText("<< The result was empty or there was no result at all."
+						+ LINE_SEPARATOR);
 			else
-				appendText(response + LINE_SEPARATOR);
-			} catch (ClassNotFoundException e) {
-				JOptionPane.showMessageDialog(null, e.getMessage(), "The server sent rubbish", JOptionPane.ERROR_MESSAGE);
-			} catch (UnknownHostException e) {
-				JOptionPane.showMessageDialog(null, e.getMessage(),
-						"Host unknown", JOptionPane.ERROR_MESSAGE);
-				return;
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, e.getMessage(),
-						"IO Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
+				appendText("<< "+response + LINE_SEPARATOR);
+		} catch (ClassNotFoundException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(),
+					"The server sent rubbish", JOptionPane.ERROR_MESSAGE);
+		} catch (UnknownHostException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Host unknown",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "IO Error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 	}
-	
+
 	/**
-	 * Sends a String object 
+	 * Sends a String object
+	 * 
 	 * @param request
 	 * @param targetAddress
 	 * @param targetPort
@@ -418,7 +434,9 @@ public class DNSClient extends JFrame implements ActionListener {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	private String sendRequest(Request request, String targetAddress, int targetPort) throws UnknownHostException, IOException, ClassNotFoundException {
+	private String sendRequest(Request request, String targetAddress,
+			int targetPort) throws UnknownHostException, IOException,
+			ClassNotFoundException {
 		Socket socket = null;
 		socket = new Socket(targetAddress, targetPort);
 		ObjectOutputStream oos = new ObjectOutputStream(
@@ -434,6 +452,5 @@ public class DNSClient extends JFrame implements ActionListener {
 		socket.close();
 		return response;
 	}
-
 
 }
