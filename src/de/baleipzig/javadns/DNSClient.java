@@ -75,7 +75,6 @@ public class DNSClient extends JFrame implements ActionListener {
 	private JComboBox cmbxOTHER;
 	private final ButtonGroup btngrpRecordType = new ButtonGroup();
 	private JTextField txfDnsPort;
-	private final String REQUEST_SEPARATOR = ",";
 	private JRadioButton rdbtnOTHER;
 
 	public DNSClient() {
@@ -384,20 +383,16 @@ public class DNSClient extends JFrame implements ActionListener {
 			appendText("Requesting the server to reset its records table.");
 		}
 		
-		
-		StringBuilder builder = new StringBuilder();
+		Request request = null;
 		if (evt.getActionCommand().equals(LOOKUP)) {
-			// build request string
-			builder.append(lookupName);
-			builder.append(REQUEST_SEPARATOR);
-			builder.append(recordType);
+			request = new Request(lookupName, recordType); 
 		}
 		else if (evt.getActionCommand().equals(RESET)) {
-			builder.append(RESET);
+			request = new Request();
 		}
 		
 		try {
-			String response = sendRequest(builder.toString(), dnsAddress, dnsPort);
+			String response = sendRequest(request, dnsAddress, dnsPort);
 			if (response.isEmpty())
 				appendText("The result was empty or there was no result at all." + LINE_SEPARATOR);
 			else
@@ -415,8 +410,17 @@ public class DNSClient extends JFrame implements ActionListener {
 			}
 	}
 	
-	
-	private String sendRequest(String request, String targetAddress, int targetPort) throws UnknownHostException, IOException, ClassNotFoundException {
+	/**
+	 * Sends a String object 
+	 * @param request
+	 * @param targetAddress
+	 * @param targetPort
+	 * @return
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private String sendRequest(Request request, String targetAddress, int targetPort) throws UnknownHostException, IOException, ClassNotFoundException {
 		Socket socket = null;
 		socket = new Socket(targetAddress, targetPort);
 		ObjectOutputStream oos = new ObjectOutputStream(

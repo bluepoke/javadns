@@ -261,8 +261,6 @@ public class DNSServer extends JFrame {
 	
 	private class RequestThread extends Thread {
 
-		private static final String RESET = "RESET";
-		private static final String REQUEST_SEPARATOR = ",";
 		private Socket socket;
 		
 		public RequestThread(Socket socket) {
@@ -277,11 +275,11 @@ public class DNSServer extends JFrame {
 				appendText("Connection from " + socket.getInetAddress().getHostAddress());
 				ObjectInputStream ois = new ObjectInputStream(
 						socket.getInputStream());
-				String requestString = (String) ois.readObject();
-				appendText("Request is: " + requestString);
+				Request request = (Request) ois.readObject();
+				appendText("Request is: " + request);
 				
 				String response = "";
-				if(requestString.equals(RESET)) {
+				if(request.getType() == Request.RESET) {
 					appendText("Trying to reset the records table.");
 					if (DomainRecord.reset()) {
 						response = "Reset successful." + LINE_SEPARATOR;
@@ -291,13 +289,9 @@ public class DNSServer extends JFrame {
 						response = "Sending 'Reset was not possible'." + LINE_SEPARATOR;
 					}
 				}
-				else {
-					// split request
-					String[] split = requestString.split(REQUEST_SEPARATOR);
-					String host = split[0];
-					String record = split[1];
+				else if (request.getType() == Request.LOOKUP){
 					// perform lookup
-					DomainRecordMessage responseMessage = lookup(host, record);
+					DomainRecordMessage responseMessage = lookup(request.getHostName(), request.getRecord());
 					appendText("Lookup result is: " + LINE_SEPARATOR + responseMessage
 							+ LINE_SEPARATOR);
 					response = responseMessage.getDnsResult().toString();
