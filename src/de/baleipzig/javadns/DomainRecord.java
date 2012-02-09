@@ -121,4 +121,9 @@ public class DomainRecord {
 		// return what you found
 		return attributes.get(record);
     }
+
+	public static boolean reset() {
+		records.clear();
+		return true;
+	}
 }

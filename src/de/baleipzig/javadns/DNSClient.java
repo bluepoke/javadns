@@ -63,7 +63,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 @SuppressWarnings("serial")
-public class DNSClient extends JFrame {
+public class DNSClient extends JFrame implements ActionListener {
+	private static final String RESET = "RESET";
+	private static final String LOOKUP = "LOOKUP";
 	private static final String LINE_SEPARATOR = System
 			.getProperty("line.separator");
 	private static final String RB_A_LABEL = "A (IPv4)";
@@ -74,6 +76,7 @@ public class DNSClient extends JFrame {
 	private final ButtonGroup btngrpRecordType = new ButtonGroup();
 	private JTextField txfDnsPort;
 	private final String REQUEST_SEPARATOR = ",";
+	private JRadioButton rdbtnOTHER;
 
 	public DNSClient() {
 		setMinimumSize(new Dimension(600, 500));
@@ -239,7 +242,7 @@ public class DNSClient extends JFrame {
 		gbc_rdbtnMX.gridy = 6;
 		panel.add(rdbtnMX, gbc_rdbtnMX);
 
-		final JRadioButton rdbtnOTHER = new JRadioButton("other:");
+		rdbtnOTHER = new JRadioButton("other:");
 		rdbtnOTHER.setActionCommand("OTHER");
 		rdbtnOTHER.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
@@ -274,92 +277,9 @@ public class DNSClient extends JFrame {
 		panel.add(cmbxOTHER, gbc_txfOTHER);
 
 		JButton btnStartLookup = new JButton("Start Lookup");
-		btnStartLookup.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				String dnsAddress = txfDnsIP.getText();
-				int dnsPort;
-				try {
-					dnsPort = Integer.parseInt(txfDnsPort.getText());
-				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(null,
-							"The port must be a number!", "Input error",
-							JOptionPane.ERROR_MESSAGE);
-					txfDnsPort.requestFocus();
-					txfDnsPort.selectAll();
-					return;
-				}
-				String lookupName = txfName.getText();
-				JRadioButton selectedButton = null;
-				Enumeration<AbstractButton> elements = btngrpRecordType
-						.getElements();
-				while (elements.hasMoreElements()) {
-					AbstractButton nextElement = elements.nextElement();
-					if (nextElement instanceof JRadioButton
-							&& nextElement.isSelected()) {
-						selectedButton = (JRadioButton) nextElement;
-					}
-				}
-				if (selectedButton != null) {
-					String recordType = selectedButton.getActionCommand();
-					if (recordType.equals(rdbtnOTHER.getActionCommand())) {
-						recordType = cmbxOTHER.getSelectedItem().toString();
-					}
-					appendText("Requesting " + recordType + " for "
-							+ lookupName + " from " + dnsAddress + ":"
-							+ dnsPort);
-					Socket socket = null;
-					try {
-						socket = new Socket(dnsAddress, dnsPort);
-					} catch (UnknownHostException e) {
-						JOptionPane.showMessageDialog(null, e.getMessage(),
-								"Host unknown", JOptionPane.ERROR_MESSAGE);
-						return;
-					} catch (IOException e) {
-						JOptionPane.showMessageDialog(null, e.getMessage(),
-								"IO Error", JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					try {
-						ObjectOutputStream oos = new ObjectOutputStream(
-								socket.getOutputStream());
-						// build request string
-						StringBuilder builder = new StringBuilder(lookupName);
-						builder.append(REQUEST_SEPARATOR);
-						builder.append(recordType);
-						// send request
-						oos.writeObject(builder.toString());
-						oos.flush();
-						
-						// read response
-						ObjectInputStream ois = new ObjectInputStream(
-								socket.getInputStream());
-						String response;
-						try {
-							response = (String) ois.readObject();
-							if (response != null) {
-								// show response in log area
-								if (response.isEmpty())
-									appendText("The result was empty or there was no result at all." + LINE_SEPARATOR);
-								else
-									appendText(response + LINE_SEPARATOR);
-							}
-						} catch (ClassNotFoundException e) {
-							JOptionPane.showMessageDialog(null, e.getMessage(), "The server sent rubbish", JOptionPane.ERROR_MESSAGE);
-						}
-						
-					} catch (IOException e) {
-						JOptionPane.showMessageDialog(null, e.getMessage(),
-								"IO Error", JOptionPane.ERROR_MESSAGE);
-					} finally {
-						try {
-							socket.close();
-						} catch (Exception e) {
-						}
-					}
+		btnStartLookup.setActionCommand(LOOKUP);
+		btnStartLookup.addActionListener(this);
 
-				}
-			}
-		});
 		GridBagConstraints gbc_btnStartLookup = new GridBagConstraints();
 		gbc_btnStartLookup.insets = new Insets(0, 0, 5, 5);
 		gbc_btnStartLookup.anchor = GridBagConstraints.WEST;
@@ -368,11 +288,9 @@ public class DNSClient extends JFrame {
 		panel.add(btnStartLookup, gbc_btnStartLookup);
 
 		JButton btnResetServer = new JButton("Reset Server");
-		btnResetServer.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO: send reset message to server
-			}
-		});
+		btnResetServer.setActionCommand(RESET);
+		btnResetServer.addActionListener(this);
+
 		GridBagConstraints gbc_btnResetServer = new GridBagConstraints();
 		gbc_btnResetServer.anchor = GridBagConstraints.WEST;
 		gbc_btnResetServer.insets = new Insets(0, 0, 5, 5);
@@ -421,5 +339,109 @@ public class DNSClient extends JFrame {
 	public static void main(String[] args) {
 		new DNSClient();
 	}
+
+	@Override
+	public void actionPerformed(ActionEvent evt) {
+		String dnsAddress = txfDnsIP.getText();
+		int dnsPort;
+		try {
+			dnsPort = Integer.parseInt(txfDnsPort.getText());
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null,
+					"The port must be a number!", "Input error",
+					JOptionPane.ERROR_MESSAGE);
+			txfDnsPort.requestFocus();
+			txfDnsPort.selectAll();
+			return;
+		}
+		
+		String recordType = "";
+		String lookupName = "";
+		
+		if (evt.getActionCommand().equals(LOOKUP)) {
+			lookupName = txfName.getText();
+			JRadioButton selectedButton = null;
+			Enumeration<AbstractButton> elements = btngrpRecordType
+					.getElements();
+			while (elements.hasMoreElements()) {
+				AbstractButton nextElement = elements.nextElement();
+				if (nextElement instanceof JRadioButton
+						&& nextElement.isSelected()) {
+					selectedButton = (JRadioButton) nextElement;
+				}
+			}
+			if (selectedButton != null) {
+				recordType = selectedButton.getActionCommand();
+				if (recordType.equals(rdbtnOTHER.getActionCommand())) {
+					recordType = cmbxOTHER.getSelectedItem().toString();
+				}
+				appendText("Requesting " + recordType + " for "
+						+ lookupName + " from " + dnsAddress + ":"
+						+ dnsPort);
+			}
+		}
+		else if (evt.getActionCommand().equals(RESET)) {
+			appendText("Requesting the server to reset its records table.");
+		}
+		
+		Socket socket = null;
+		try {
+			socket = new Socket(dnsAddress, dnsPort);
+		} catch (UnknownHostException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(),
+					"Host unknown", JOptionPane.ERROR_MESSAGE);
+			return;
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(),
+					"IO Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(
+					socket.getOutputStream());
+			
+			StringBuilder builder = new StringBuilder();
+			if (evt.getActionCommand().equals(LOOKUP)) {
+				// build request string
+				builder.append(lookupName);
+				builder.append(REQUEST_SEPARATOR);
+				builder.append(recordType);
+			}
+			else if (evt.getActionCommand().equals(RESET)) {
+				builder.append(RESET);
+			}
+			// send request
+			oos.writeObject(builder.toString());
+			oos.flush();
+
+			// read response
+			ObjectInputStream ois = new ObjectInputStream(
+					socket.getInputStream());
+			String response;
+			try {
+				response = (String) ois.readObject();
+				if (response != null) {
+					// show response in log area
+					if (response.isEmpty())
+						appendText("The result was empty or there was no result at all." + LINE_SEPARATOR);
+					else
+						appendText(response + LINE_SEPARATOR);
+				}
+			} catch (ClassNotFoundException e) {
+				JOptionPane.showMessageDialog(null, e.getMessage(), "The server sent rubbish", JOptionPane.ERROR_MESSAGE);
+			}
+
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(),
+					"IO Error", JOptionPane.ERROR_MESSAGE);
+		} finally {
+			try {
+				socket.close();
+			} catch (Exception e) {
+			}
+		}
+
+	}
+
 
 }

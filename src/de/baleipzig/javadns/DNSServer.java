@@ -234,6 +234,7 @@ public class DNSServer extends JFrame {
 	
 	private class RequestThread extends Thread {
 
+		private static final String RESET = "RESET";
 		private static final String REQUEST_SEPARATOR = ",";
 		private Socket socket;
 		
@@ -251,19 +252,36 @@ public class DNSServer extends JFrame {
 						socket.getInputStream());
 				String requestString = (String) ois.readObject();
 				appendText("Request is: " + requestString);
-				// split request
-				String[] split = requestString.split(REQUEST_SEPARATOR);
-				String host = split[0];
-				String record = split[1];
-				// perform lookup
-				DomainRecordMessage responseMessage = lookup(host, record);
-				appendText("Lookup result is: " + LINE_SEPARATOR + responseMessage
-						+ LINE_SEPARATOR);
+				
+				String response = "";
+				if(requestString.equals(RESET)) {
+					appendText("Trying to reset the records table.");
+					if (DomainRecord.reset()) {
+						response = "Reset successful." + LINE_SEPARATOR;
+						appendText("Sending 'Reset successful'." + LINE_SEPARATOR);
+					}
+					else {
+						response = "Sending 'Reset was not possible'." + LINE_SEPARATOR;
+					}
+				}
+				else {
+					// split request
+					String[] split = requestString.split(REQUEST_SEPARATOR);
+					String host = split[0];
+					String record = split[1];
+					// perform lookup
+					DomainRecordMessage responseMessage = lookup(host, record);
+					appendText("Lookup result is: " + LINE_SEPARATOR + responseMessage
+							+ LINE_SEPARATOR);
+					response = responseMessage.getDnsResult().toString();
+					response = response.substring(1, response.length() - 1);
+				}
+				
 				// send response
 				ObjectOutputStream oos = new ObjectOutputStream(
 						socket.getOutputStream());
-				String response = responseMessage.getDnsResult().toString();
-				oos.writeObject(response.substring(1, response.length() - 1));
+				
+				oos.writeObject(response);
 				oos.flush();
 				oos.close();
 				socket.close();
