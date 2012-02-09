@@ -61,6 +61,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 @SuppressWarnings("serial")
 public class DNSClient extends JFrame implements ActionListener {
@@ -243,16 +245,7 @@ public class DNSClient extends JFrame implements ActionListener {
 
 		rdbtnOTHER = new JRadioButton("other:");
 		rdbtnOTHER.setActionCommand("OTHER");
-		rdbtnOTHER.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent arg0) {
-				if (rdbtnOTHER.isSelected()) {
-					cmbxOTHER.setEnabled(true);
-					cmbxOTHER.requestFocus();
-				} else {
-					cmbxOTHER.setEnabled(false);
-				}
-			}
-		});
+
 		btngrpRecordType.add(rdbtnOTHER);
 		GridBagConstraints gbc_rdbtnOTHER = new GridBagConstraints();
 		gbc_rdbtnOTHER.anchor = GridBagConstraints.WEST;
@@ -262,12 +255,17 @@ public class DNSClient extends JFrame implements ActionListener {
 		panel.add(rdbtnOTHER, gbc_rdbtnOTHER);
 
 		cmbxOTHER = new JComboBox();
+		cmbxOTHER.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				rdbtnOTHER.setSelected(true);
+			}
+		});
 		cmbxOTHER.setModel(new DefaultComboBoxModel(new String[] { "AFSDB",
 				"APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY",
 				"DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3",
 				"NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV",
 				"SSHFP", "TA", "TKEY", "TSIG" }));
-		cmbxOTHER.setEnabled(false);
 		GridBagConstraints gbc_txfOTHER = new GridBagConstraints();
 		gbc_txfOTHER.insets = new Insets(0, 0, 5, 0);
 		gbc_txfOTHER.fill = GridBagConstraints.HORIZONTAL;
