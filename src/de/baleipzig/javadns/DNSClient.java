@@ -380,29 +380,21 @@ public class DNSClient extends JFrame implements ActionListener {
 				if (recordType.equals(rdbtnOTHER.getActionCommand())) {
 					recordType = cmbxOTHER.getSelectedItem().toString();
 				}
-				appendText(">> Requesting " + recordType + " for " + lookupName
-						+ " from " + dnsAddress + ":" + dnsPort);
 			}
 			request = new Request(lookupName, recordType);
 		} else if (evt.getActionCommand().equals(RESET)) {
 			request = new Request();
-			appendText(">> Requesting the server to reset its records table.");
 		} else if (evt.getActionCommand().equals(REGISTER)) {
 			RegisterDialog dialog = new RegisterDialog();
-			dialog.setVisible(true);
 			if (dialog.getButtonClicked() == RegisterDialog.OK) {
 				String hostName = dialog.getHostName();
 				HashMap<String,Attribute> map = dialog.getAttributes();
 				request = new Request(hostName, map);
-				appendText(">> Registering at server as "+hostName);
-				appendText(">> Attributes:");
-				for (String key : map.keySet()) {
-					appendText(">> "+map.get(key));
-				}
 			}
 		}
 
 		try {
+			appendText(">> Sending request: "+request.toString());
 			String response = sendRequest(request, dnsAddress, dnsPort);
 			if (response.isEmpty())
 				appendText("<< The result was empty or there was no result at all."
