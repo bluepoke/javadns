@@ -36,9 +36,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -53,15 +55,18 @@ import javax.swing.JTree;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
+import javax.swing.JComboBox;
 
 @SuppressWarnings("serial")
 public class DNSServer extends JFrame {
+	private static final String ALL_AVAILABLE_IP_ADDRESSES = "All available IP addresses";
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static int DEFAULT_PORT = 53;
 	private JTextArea logTextArea;
 	private JButton btnStartServer, btnStopServer;
 	private JTextField txfPort;
 	private ServerWorker serverWorker;
+	private JComboBox cmbxIP;
 
 	public DNSServer(String title) {
 		setMinimumSize(new Dimension(600, 500));
@@ -109,6 +114,21 @@ public class DNSServer extends JFrame {
 		JPanel panel = new JPanel();
 		getContentPane().add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		
+		JLabel lblIP = new JLabel("IP:");
+		panel.add(lblIP);
+		
+		cmbxIP = new JComboBox();
+		cmbxIP.addItem(ALL_AVAILABLE_IP_ADDRESSES);
+		panel.add(cmbxIP);
+		
+		// read available IPs
+		try {
+			for (InetAddress address : InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) {
+				cmbxIP.addItem(address);
+			}
+		} catch (UnknownHostException e) {
+		}
 		
 		JLabel lblPort = new JLabel("Port:");
 		panel.add(lblPort);
@@ -173,10 +193,15 @@ public class DNSServer extends JFrame {
 	}
 	
 	private void start() {
+		cmbxIP.setEnabled(false);
 		btnStartServer.setEnabled(false);
 		btnStopServer.setEnabled(true);
 		int port = Integer.parseInt(txfPort.getText());
-		serverWorker = new ServerWorker(port);
+		InetAddress address = null;
+		if (cmbxIP.getSelectedItem() instanceof InetAddress) {
+			address = (InetAddress) cmbxIP.getSelectedItem();
+		}
+		serverWorker = new ServerWorker(address, port);
 		serverWorker.execute();
 	}
 	
@@ -195,17 +220,18 @@ public class DNSServer extends JFrame {
 
 		private int port;
 		private boolean isRunning = true;
+		private InetAddress address;
 
-		public ServerWorker(int port) {
+		public ServerWorker(InetAddress address, int port) {
 			super();
 			this.port = port;
-			isRunning = true;
+			this.address = address;
 		}
 		
 		@Override
 		protected Object doInBackground() throws Exception {
-			appendText("Server listening at port "+port+LINE_SEPARATOR);
-			ServerSocket serverSocket = new ServerSocket(port);
+			appendText("Server listening at "+(address==null?"all available IP addresses":address.getHostAddress())+":"+port);
+			ServerSocket serverSocket = new ServerSocket(port, -1, address);
 			serverSocket.setSoTimeout(5000); // timeout 5s
 			while (isRunning) {
 				Socket clientSocket;
@@ -221,6 +247,7 @@ public class DNSServer extends JFrame {
 			serverSocket.close();
 			appendText("Server stopped."+LINE_SEPARATOR);
 			btnStartServer.setEnabled(true);
+			cmbxIP.setEnabled(true);
 			return null;
 		}		
 		
