@@ -41,7 +41,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
+import javax.naming.directory.Attribute;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -296,6 +298,21 @@ public class DNSServer extends JFrame {
 							+ LINE_SEPARATOR);
 					response = responseMessage.getDnsResult().toString();
 					response = response.substring(1, response.length() - 1);
+				}
+				else if (request.getType() == Request.IDENTIFY) {
+					HashMap<String, Attribute> result = DomainRecord.addRecord(request.getHostName(), request.getAttributes());
+					if (result == null) {
+						appendText("Host " + socket.getInetAddress().getHostAddress() 
+								+ " is now identified as " + request.getHostName() + LINE_SEPARATOR);
+						response = "You are now identified as '" + request.getHostName()
+								+ "'." + LINE_SEPARATOR;
+					}
+					else {
+						appendText("Host " + socket.getInetAddress().getHostAddress() 
+								+ " replaces identification of " + request.getHostName() + LINE_SEPARATOR);
+						response = "You are now identified as '" + request.getHostName()
+								+ "' and replaced the previously held record." + LINE_SEPARATOR;
+					}
 				}
 				
 				// send response

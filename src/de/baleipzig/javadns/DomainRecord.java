@@ -145,7 +145,7 @@ public class DomainRecord {
 		return attributes;
 	}
 	
-	public HashMap<String, Attribute> addRecord(String desiredHostName, HashMap<String, Attribute> desiredAttributes) {
+	public static HashMap<String, Attribute> addRecord(String desiredHostName, HashMap<String, Attribute> desiredAttributes) {
 		HashMap<String, Attribute> attributes = createCompleteAttributes();
 		
 		for (String key : desiredAttributes.keySet()) {
