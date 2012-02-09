@@ -190,6 +190,12 @@ public class DNSServer extends JFrame {
 		}
 	}
 
+	/**
+	 * Performs a lookup.
+	 * @param hostName Host to look up.
+	 * @param recordType Record to look up for this host.
+	 * @return 
+	 */
 	protected static DomainRecordMessage lookup(String hostName, String recordType) {
 		return DomainRecord.lookup(hostName, recordType);
 	}
@@ -218,6 +224,10 @@ public class DNSServer extends JFrame {
 		server.setVisible(true);
 	}
 	
+	/**
+	 * This class waits for connections and passes each incoming
+	 * connection on to a separate thread that handles it.
+	 */
 	private class ServerWorker extends SwingWorker<Object, Object> {
 
 		private int port;
@@ -261,6 +271,11 @@ public class DNSServer extends JFrame {
 		
 	}
 	
+	/**
+	 * This class handles the requests.
+	 * It reads the request from the socket, performs lookups, resets or registration
+	 * and sends a message back to the requester.
+	 */
 	private class RequestThread extends Thread {
 
 		private Socket socket;

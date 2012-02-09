@@ -38,6 +38,10 @@ public class RegisterDialog extends JDialog {
 	private int buttonClicked = CANCEL;
 	private JTextField txfHostName;
 	
+	/**
+	 * Creates and displays a dialog where hostname and attributes
+	 * can be set for registration.
+	 */
 	public RegisterDialog() {
 		setMinimumSize(new Dimension(400, 400));
 		setPreferredSize(new Dimension(400, 400));
@@ -83,6 +87,7 @@ public class RegisterDialog extends JDialog {
 		pnlButtonPanel.add(btnCancel);
 		
 		setLocationRelativeTo(getOwner());
+		setVisible(true);
 	}
 
 	private void initializeContents() {

@@ -424,12 +424,12 @@ public class DNSClient extends JFrame implements ActionListener {
 	}
 
 	/**
-	 * Sends a String object
+	 * Sends a Request
 	 * 
-	 * @param request
-	 * @param targetAddress
-	 * @param targetPort
-	 * @return
+	 * @param request The request to send.
+	 * @param targetAddress Address to send the request to.
+	 * @param targetPort Port to send the request to.
+	 * @return A message from the server.
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 * @throws ClassNotFoundException
