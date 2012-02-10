@@ -29,6 +29,7 @@
 
 package de.baleipzig.javadns;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -40,6 +41,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 public class DomainRecord {
     
@@ -153,5 +155,57 @@ public class DomainRecord {
 		}
 		
 		return records.put(desiredHostName, attributes);
+	}
+	
+	// André fill the tree with nodes ///////////////////////
+	public static DefaultMutableTreeNode fillTreeNode(DefaultMutableTreeNode node, String hostName) {
+		 
+			int i = 0;
+			// check how many child elemnts in the tree
+			// if this value not 0 then, check if the HS value
+			// is the Tree
+			if (node.getChildCount() != 0)
+			{
+			
+					Enumeration e = node.children();
+					
+					while (e.hasMoreElements()) {
+						String nextElement = e.nextElement().toString();
+						//System.out.println(nextElement);
+						// control if the value is not in the tree
+						if (nextElement.equals(hostName))
+						{
+							i++;
+							break;
+						}
+						
+					}
+					
+					// if i == 0 then no matching was found
+					if (i == 0) {
+						
+						node.add(new DefaultMutableTreeNode(hostName));
+						return node;
+						
+					}
+			
+			}
+			else
+			{
+				node.add(new DefaultMutableTreeNode(hostName));
+				return node;	
+			}
+			
+			return node;	
+					
+	}
+	
+	// delete all nodes if the user do a Server refresh
+	public static DefaultMutableTreeNode deleteTreeNode (DefaultMutableTreeNode node) {
+		
+		node.removeAllChildren();
+		
+		return node;
+		
 	}
 }
