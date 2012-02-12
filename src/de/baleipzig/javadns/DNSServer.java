@@ -353,7 +353,7 @@ public class DNSServer extends JFrame {
 					
 					// fill the tree with nodes, take the data which are come from the user to check
 					// if the entry is in the tree
-					DomainRecord.fillTreeNode(node, request.getHostName());
+					DomainRecord.fillTreeNode(node, request.getHostName(), request.getRecord(), response);
 				}
 				else if (request.getType() == Request.IDENTIFY) {
 					HashMap<String, Attribute> result = DomainRecord.addRecord(request.getHostName(), request.getAttributes());

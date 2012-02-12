@@ -42,6 +42,10 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 
 public class DomainRecord {
     
@@ -158,46 +162,126 @@ public class DomainRecord {
 	}
 	
 	// André fill the tree with nodes ///////////////////////
-	public static DefaultMutableTreeNode fillTreeNode(DefaultMutableTreeNode node, String hostName) {
+	public static DefaultMutableTreeNode fillTreeNode(DefaultMutableTreeNode node, String hostName, String record, String response) {
 		 
-			int i = 0;
-			// check how many child elemnts in the tree
-			// if this value not 0 then, check if the HS value
-			// is the Tree
-			if (node.getChildCount() != 0)
-			{
+			int i = 0; // counter entry level for the node child
+			int j = 0; // counter HostNames 
+			int k = 0; // counter for the second level
+			// is necessary to add a node on the right node
+			DefaultTreeModel treeModel = new DefaultTreeModel(node);
+			DefaultMutableTreeNode hostNameNode = null;
+			DefaultMutableTreeNode recordNode = null;
+			DefaultMutableTreeNode responseLeaf = null;		
 			
+			// control if the hostName starts with www.
+			// if true = replace it (because www.google.de and google.de give back the same result)
+			if (hostName.startsWith("www"))
+			{
+				//System.out.println("We must do something.");
+				hostName = hostName.replaceFirst("www.", "");
+			}
+			
+			// check how many child elemnts in the tree
+			// if this value !0 then, check if the host name value is the Tree
+			if (node.getChildCount() != 0) {
+					
 					Enumeration e = node.children();
 					
 					while (e.hasMoreElements()) {
 						String nextElement = e.nextElement().toString();
-						//System.out.println(nextElement);
 						// control if the value is not in the tree
 						if (nextElement.equals(hostName))
 						{
-							i++;
+							j++;							
+							// look if the hostNameLeaf have a child
+							TreeNode hostNameTreeNode = node.getChildAt(i);
+							Enumeration e2 = hostNameTreeNode.children();
+							
+							while (e2.hasMoreElements()) {								
+								String nextNodeElement = e2.nextElement().toString();
+								// look, if the record is in the node
+								if (nextNodeElement.equals(record))
+								{
+									k++;
+									break;
+								}
+							}
+							
+							// if no matching was found
+							// add nextNodeElement, if they is not in the list
+							if (k == 0)
+							{
+								recordNode = new DefaultMutableTreeNode(record);
+								// control if the response string is no empty
+								if (!response.isEmpty())
+								{
+									// split to make it better to read
+									String[] splitS = response.split(", ");
+									for (int l = 0; l < splitS.length; l++)
+									{
+										responseLeaf = new DefaultMutableTreeNode(splitS[l]);
+										recordNode.add(responseLeaf);
+									}
+								}
+								else
+								{
+									// wirte in the leaf:
+									responseLeaf = new DefaultMutableTreeNode("no result");
+									recordNode.add(responseLeaf);
+								}
+								// insert the Node on the right place (name of the new leaf, node of the leaf, add it at last in the leaf)
+								treeModel.insertNodeInto(recordNode, (MutableTreeNode) node.getChildAt(i), node.getChildAt(i).getChildCount());
+							}
 							break;
-						}
-						
+						}						
+						i++;
 					}
 					
 					// if i == 0 then no matching was found
-					if (i == 0) {
-						
-						node.add(new DefaultMutableTreeNode(hostName));
-						return node;
-						
-					}
-			
+					// add hostName, if they is not in the list
+					if (j == 0) {
+						node.add(createNewNode(hostName, record, response , hostNameNode, recordNode, responseLeaf));
+						return node;						
+					}			
 			}
 			else
 			{
-				node.add(new DefaultMutableTreeNode(hostName));
+				node.add(createNewNode(hostName, record, response , hostNameNode, recordNode, responseLeaf));
 				return node;	
 			}
 			
 			return node;	
 					
+	}
+	
+	private static DefaultMutableTreeNode createNewNode(String hostName, String record, String response,
+			DefaultMutableTreeNode hostNameNode, DefaultMutableTreeNode recordNode, DefaultMutableTreeNode responseLeaf) {		
+	  // add hostName, if the Tree is empty
+		hostNameNode = new DefaultMutableTreeNode(hostName);
+		
+		recordNode = new DefaultMutableTreeNode(record);
+		// add hostNameLeaf the recordLeaf
+		hostNameNode.add(recordNode);
+		
+		// control if the response string is no empty
+		if (!response.isEmpty())
+		{
+			String[] splitS = response.split(", ");
+			for (int l = 0; l < splitS.length; l++)
+			{
+				responseLeaf = new DefaultMutableTreeNode(splitS[l]);
+				// add recordNode the response
+				recordNode.add(responseLeaf);
+			}
+		}
+		else
+		{
+			responseLeaf = new DefaultMutableTreeNode("no result");
+			// add recordNode the response
+			recordNode.add(responseLeaf);
+		}
+		
+		return hostNameNode;
 	}
 	
 	// delete all nodes if the user do a Server refresh
