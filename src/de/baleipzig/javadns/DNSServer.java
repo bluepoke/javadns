@@ -334,13 +334,13 @@ public class DNSServer extends JFrame {
 					appendText("Trying to reset the records table.");
 					if (DomainRecord.reset()) {
 						response = "Reset successful." + LINE_SEPARATOR;
-						appendText("Sending 'Reset successful'." + LINE_SEPARATOR);
+						appendText("Sending: 'Reset successful'." + LINE_SEPARATOR);
 						
 						// delete the Tree Nodes
 						DomainRecord.deleteTreeNode(node);
 					}
 					else {
-						response = "Sending 'Reset was not possible'." + LINE_SEPARATOR;
+						response = "Sending: 'Reset was not possible'." + LINE_SEPARATOR;
 					}
 				}
 				else if (request.getType() == Request.LOOKUP){
@@ -358,14 +358,14 @@ public class DNSServer extends JFrame {
 				else if (request.getType() == Request.IDENTIFY) {
 					HashMap<String, Attribute> result = DomainRecord.addRecord(request.getHostName(), request.getAttributes());
 					if (result == null) {
-						appendText("Host " + socket.getInetAddress().getHostAddress() 
-								+ " is now identified as " + request.getHostName() + LINE_SEPARATOR);
+						appendText("Host '" + socket.getInetAddress().getHostAddress() 
+								+ "' is now identified as '" + request.getHostName() + "'" + LINE_SEPARATOR);
 						response = "You are now identified as '" + request.getHostName()
 								+ "'." + LINE_SEPARATOR;
 					}
 					else {
-						appendText("Host " + socket.getInetAddress().getHostAddress() 
-								+ " replaces identification of " + request.getHostName() + LINE_SEPARATOR);
+						appendText("Host '" + socket.getInetAddress().getHostAddress() 
+								+ "' replaces identification of '" + request.getHostName() + "'" + LINE_SEPARATOR);
 						response = "You are now identified as '" + request.getHostName()
 								+ "' and replaced the previously held record." + LINE_SEPARATOR;
 					}

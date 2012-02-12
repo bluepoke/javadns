@@ -98,23 +98,23 @@ public class Request implements Serializable{
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		if (type == IDENTIFY) {
-			s.append("IDENTIFY ");
+			s.append("IDENTIFY '");
 			s.append(hostName);
-			s.append(" with records ");
+			s.append("' with records '");
 			Iterator<String> iterator = attributes.keySet().iterator();
 			while(iterator.hasNext()) {
 				String key = iterator.next();
-				s.append(attributes.get(key));
+				s.append(attributes.get(key) + "'");
 				if (iterator.hasNext()) {
-					s.append(", ");
+					s.append(", '");
 				}
 			}
 		} else if (type == LOOKUP) {
 			s.append("LOOKUP ");
-			s.append("record ");
+			s.append("record '");
 			s.append(record);
-			s.append(" for host ");
-			s.append(hostName);
+			s.append("' for host '");
+			s.append(hostName + "'");
 		} else {
 			//RESET
 			s.append("RESET");
