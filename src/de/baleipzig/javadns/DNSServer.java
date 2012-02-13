@@ -46,6 +46,7 @@ import java.util.HashMap;
 import javax.naming.directory.Attribute;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,9 +58,6 @@ import javax.swing.JTree;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
-import javax.swing.JComboBox;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 @SuppressWarnings("serial")
 public class DNSServer extends JFrame {
@@ -71,8 +69,7 @@ public class DNSServer extends JFrame {
 	private JTextField txfPort;
 	private ServerWorker serverWorker;
 	private JComboBox cmbxIP;
-	private DefaultTreeModel treeModel;
-	private DefaultMutableTreeNode node;
+	private DNSTreeModel treeModel;
 
 	public DNSServer(String title) {
 		setMinimumSize(new Dimension(600, 500));
@@ -94,7 +91,7 @@ public class DNSServer extends JFrame {
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JSplitPane splitPane = new JSplitPane();
-		splitPane.setEnabled(false);
+		splitPane.setEnabled(true);
 		splitPane.setResizeWeight(0.75);
 		getContentPane().add(splitPane);
 		
@@ -112,37 +109,10 @@ public class DNSServer extends JFrame {
 		JScrollPane treeScrollPane = new JScrollPane();
 		splitPane.setRightComponent(treeScrollPane);
 		
-		// deklaration and initialisation the JTree
+		// Declaration and initialization of the JTree
 		JTree recordTree = new JTree();
-		node = new DefaultMutableTreeNode("DNS Cache");
-		treeModel = new DefaultTreeModel(node);
+		treeModel = new DNSTreeModel("DNS Records");
 		recordTree.setModel(treeModel);
-		// don´t forget to put this code into a extra method
-//		recordTree.setModel(new DefaultTreeModel(
-//			new DefaultMutableTreeNode("DNS Cache") {
-//				{
-//					DefaultMutableTreeNode node_1;
-//					node_1 = new DefaultMutableTreeNode("colors");
-//						node_1.add(new DefaultMutableTreeNode("blue"));
-//						node_1.add(new DefaultMutableTreeNode("violet"));
-//						node_1.add(new DefaultMutableTreeNode("red"));
-//						node_1.add(new DefaultMutableTreeNode("yellow"));
-//					add(node_1);
-//					node_1 = new DefaultMutableTreeNode("sports");
-//						node_1.add(new DefaultMutableTreeNode("basketball"));
-//						node_1.add(new DefaultMutableTreeNode("soccer"));
-//						node_1.add(new DefaultMutableTreeNode("football"));
-//						node_1.add(new DefaultMutableTreeNode("hockey"));
-//					add(node_1);
-//					node_1 = new DefaultMutableTreeNode("food");
-//						node_1.add(new DefaultMutableTreeNode("hot dogs"));
-//						node_1.add(new DefaultMutableTreeNode("pizza"));
-//						node_1.add(new DefaultMutableTreeNode("ravioli"));
-//						node_1.add(new DefaultMutableTreeNode("bananas"));
-//					add(node_1);
-//				}
-//			}
-//		));
 		treeScrollPane.setViewportView(recordTree);
 		recordTree.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
 				null, null));
@@ -334,13 +304,10 @@ public class DNSServer extends JFrame {
 					appendText("Trying to reset the records table.");
 					if (DomainRecord.reset()) {
 						response = "Reset successful." + LINE_SEPARATOR;
-						appendText("Sending 'Reset successful'." + LINE_SEPARATOR);
-						
-						// delete the Tree Nodes
-						DomainRecord.deleteTreeNode(node);
+						appendText("Sending: 'Reset successful'." + LINE_SEPARATOR);
 					}
 					else {
-						response = "Sending 'Reset was not possible'." + LINE_SEPARATOR;
+						response = "Sending: 'Reset was not possible'." + LINE_SEPARATOR;
 					}
 				}
 				else if (request.getType() == Request.LOOKUP){
@@ -350,29 +317,25 @@ public class DNSServer extends JFrame {
 							+ LINE_SEPARATOR);
 					response = responseMessage.getDnsResult().toString();
 					response = response.substring(1, response.length() - 1);
-					
-					// fill the tree with nodes, take the data which are come from the user to check
-					// if the entry is in the tree
-					DomainRecord.fillTreeNode(node, request.getHostName(), request.getRecord(), response);
 				}
 				else if (request.getType() == Request.IDENTIFY) {
 					HashMap<String, Attribute> result = DomainRecord.addRecord(request.getHostName(), request.getAttributes());
 					if (result == null) {
-						appendText("Host " + socket.getInetAddress().getHostAddress() 
-								+ " is now identified as " + request.getHostName() + LINE_SEPARATOR);
+						appendText("Host '" + socket.getInetAddress().getHostAddress() 
+								+ "' is now identified as '" + request.getHostName() + "'" + LINE_SEPARATOR);
 						response = "You are now identified as '" + request.getHostName()
 								+ "'." + LINE_SEPARATOR;
 					}
 					else {
-						appendText("Host " + socket.getInetAddress().getHostAddress() 
-								+ " replaces identification of " + request.getHostName() + LINE_SEPARATOR);
+						appendText("Host '" + socket.getInetAddress().getHostAddress() 
+								+ "' replaces identification of '" + request.getHostName() + "'" + LINE_SEPARATOR);
 						response = "You are now identified as '" + request.getHostName()
 								+ "' and replaced the previously held record." + LINE_SEPARATOR;
 					}
 				}
 				
 				// refresh Tree
-				treeModel.reload();
+				treeModel.fireTreeStructureChanged(treeModel.getRoot());
 				// send response
 				ObjectOutputStream oos = new ObjectOutputStream(
 						socket.getOutputStream());
