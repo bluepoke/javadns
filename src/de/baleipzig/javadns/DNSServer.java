@@ -58,6 +58,7 @@ import javax.swing.JTree;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
+import javax.swing.tree.TreePath;
 
 @SuppressWarnings("serial")
 public class DNSServer extends JFrame {
@@ -70,6 +71,7 @@ public class DNSServer extends JFrame {
 	private ServerWorker serverWorker;
 	private JComboBox cmbxIP;
 	private DNSTreeModel treeModel;
+	private JTree recordTree;
 
 	public DNSServer(String title) {
 		setMinimumSize(new Dimension(600, 500));
@@ -109,8 +111,7 @@ public class DNSServer extends JFrame {
 		JScrollPane treeScrollPane = new JScrollPane();
 		splitPane.setRightComponent(treeScrollPane);
 		
-		// Declaration and initialization of the JTree
-		JTree recordTree = new JTree();
+		recordTree = new JTree();
 		treeModel = new DNSTreeModel("DNS Records");
 		recordTree.setModel(treeModel);
 		treeScrollPane.setViewportView(recordTree);
@@ -305,6 +306,8 @@ public class DNSServer extends JFrame {
 					if (DomainRecord.reset()) {
 						response = "Reset successful." + LINE_SEPARATOR;
 						appendText("Sending: 'Reset successful'." + LINE_SEPARATOR);
+						// remove selection from tree
+						recordTree.setSelectionPath(null);
 					}
 					else {
 						response = "Sending: 'Reset was not possible'." + LINE_SEPARATOR;
@@ -334,8 +337,12 @@ public class DNSServer extends JFrame {
 					}
 				}
 				
+				// keep selection
+				TreePath selectionPath = recordTree.getSelectionPath();
 				// refresh Tree
 				treeModel.fireTreeStructureChanged(treeModel.getRoot());
+				// restore selection
+				recordTree.setSelectionPath(selectionPath);
 				// send response
 				ObjectOutputStream oos = new ObjectOutputStream(
 						socket.getOutputStream());
