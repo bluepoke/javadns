@@ -161,6 +161,10 @@ public class DomainRecord {
 		return records.put(desiredHostName, attributes);
 	}
 	
+	public static HashMap<String, HashMap<String, Attribute>> getRecords() {
+		return records;
+	}
+
 	// André fill the tree with nodes ///////////////////////
 	public static DefaultMutableTreeNode fillTreeNode(DefaultMutableTreeNode node, String hostName, String record, String response) {
 		 
