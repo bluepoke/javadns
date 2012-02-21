@@ -429,6 +429,9 @@ public class DNSClient extends JFrame implements ActionListener {
 				String hostName = dialog.getHostName();
 				HashMap<String,Attribute> map = dialog.getAttributes();
 				request = new Request(hostName, map);
+			} else {
+				// dialog cancelled -> do nothing
+				return;
 			}
 		}
 
