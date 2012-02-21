@@ -1,10 +1,11 @@
 /* **************************************************************************
  *                                                                          *
  *  Copyright (C)  2011  Nils Foken, André Kießlich,                        *
+ *  Copyright (C)  2011  Nils Foken, Andr? Kie?lich,                        *
  *                       Peter Kossek, Hans Laser                           *
  *                                                                          *
  *  Nils Foken       <nils.foken@it2009.ba-leipzig.de>                      *
- *  André Kießlich   <andre.kiesslich@it2009.ba-leipzig.de>                 *
+ *  Andr? Kie?lich   <andre.kiesslich@it2009.ba-leipzig.de>                 *
  *  Peter Kossek     <peter.kossek@it2009.ba-leipzig.de>                    *
  *  Hans Laser       <hans.laser@it2009.ba-leipzig.de>                      *
  *                                                                          *
@@ -89,6 +90,10 @@ public class DNSClient extends JFrame implements ActionListener {
 	private JRadioButton rdbtnOTHER;
 
 	public DNSClient() {
+		/* 
+		 * setze die minimale Größe des Fensters auf 600x500
+		 * vergebe Fenstertitel und LookAndFeel
+		 */
 		setMinimumSize(new Dimension(600, 500));
 		setTitle("DNS Client");
 		try {
@@ -97,13 +102,19 @@ public class DNSClient extends JFrame implements ActionListener {
 		} catch (Exception e) {
 			// simply ignore if it doesn't work
 		}
-
+		
+		// Beende das Programm beim schließen durch [x]
 		// exit application on closing event
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		// create layout and contents
 
+		/*
+		 * das MainPanel erhält Ränder und ein GridBagLayout
+		 * Positionen werden über die Constraints angegeben
+		 * Benötigte Felder werden ff erstellt
+		 */
 		JPanel pnlMainPanel = new JPanel();
 		pnlMainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(pnlMainPanel, BorderLayout.CENTER);
@@ -365,6 +376,9 @@ public class DNSClient extends JFrame implements ActionListener {
 	}
 
 	public static void main(String[] args) {
+		/*
+		 * erzeuge ein Instanz von DNSClient
+		 */
 		new DNSClient();
 	}
 
