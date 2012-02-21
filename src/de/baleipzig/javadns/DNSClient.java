@@ -65,14 +65,21 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 
+/**
+ * This is the DNSClient that can communicate with the DNSServer.
+ * It is a JFrame.
+ */
 @SuppressWarnings("serial")
 public class DNSClient extends JFrame implements ActionListener {
+	/** Action command to reset the server. */
 	private static final String RESET = "RESET";
+	/** Action command to look up a host's attribute */
 	private static final String LOOKUP = "LOOKUP";
+	/** Action command to register the client */
 	private static final String REGISTER = "REGISTER";
+	/** System's line separator */
 	private static final String LINE_SEPARATOR = System
 			.getProperty("line.separator");
-	private static final String RB_A_LABEL = "A (IPv4)";
 	private JTextField txfName;
 	private JTextArea textArea;
 	private JTextField txfDnsIP;
@@ -85,13 +92,17 @@ public class DNSClient extends JFrame implements ActionListener {
 		setMinimumSize(new Dimension(600, 500));
 		setTitle("DNS Client");
 		try {
+			// try to set system's look & feel
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			// simply ignore if it doesn't work
 		}
 
+		// exit application on closing event
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
+		
+		// create layout and contents
 
 		JPanel pnlMainPanel = new JPanel();
 		pnlMainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -161,6 +172,8 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfName.gridy = 2;
 		pnlMainPanel.add(txfName, gbc_txfName);
 		txfName.setColumns(10);
+		
+		// radio buttons for common record types
 
 		JLabel lblRequestType = new JLabel("Record Type:");
 		GridBagConstraints gbc_lblRequestType = new GridBagConstraints();
@@ -170,7 +183,7 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_lblRequestType.gridy = 3;
 		pnlMainPanel.add(lblRequestType, gbc_lblRequestType);
 
-		JRadioButton rdbtnA = new JRadioButton(RB_A_LABEL);
+		JRadioButton rdbtnA = new JRadioButton("A (IPv4)");
 		rdbtnA.setActionCommand("A");
 
 		rdbtnA.setSelected(true);
@@ -260,9 +273,12 @@ public class DNSClient extends JFrame implements ActionListener {
 		cmbxOTHER.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent arg0) {
+				// automatically select radio button
+				// that belongs to combo box
 				rdbtnOTHER.setSelected(true);
 			}
 		});
+		// fill combo box with values
 		cmbxOTHER.setModel(new DefaultComboBoxModel(new String[] { "AFSDB",
 				"APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY",
 				"DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3",
@@ -286,6 +302,8 @@ public class DNSClient extends JFrame implements ActionListener {
 		pnlMainPanel.add(pnlButtonPanel, gbc_pnlButtonPanel);
 		pnlButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
+		// buttons
+		
 		JButton btnStartLookup = new JButton("Start Lookup");
 		pnlButtonPanel.add(btnStartLookup);
 		btnStartLookup.setActionCommand(LOOKUP);
@@ -301,6 +319,8 @@ public class DNSClient extends JFrame implements ActionListener {
 		pnlButtonPanel.add(btnRegister);
 		btnResetServer.addActionListener(this);
 		btnStartLookup.addActionListener(this);
+		
+		// log area
 
 		JLabel lblResponse = new JLabel("Log:");
 		GridBagConstraints gbc_lblResponse = new GridBagConstraints();
@@ -335,6 +355,10 @@ public class DNSClient extends JFrame implements ActionListener {
 		setVisible(true);
 	}
 
+	/**
+	 * Append some text to the log area followed by a line separator.
+	 * @param text The text to add.
+	 */
 	private void appendText(String text) {
 		textArea.append(text + LINE_SEPARATOR);
 		textArea.setCaretPosition(textArea.getText().length());
@@ -383,8 +407,10 @@ public class DNSClient extends JFrame implements ActionListener {
 			}
 			request = new Request(lookupName, recordType);
 		} else if (evt.getActionCommand().equals(RESET)) {
+			// create reset request
 			request = new Request();
 		} else if (evt.getActionCommand().equals(REGISTER)) {
+			// open dialog to specify record entries
 			RegisterDialog dialog = new RegisterDialog();
 			if (dialog.getButtonClicked() == RegisterDialog.OK) {
 				String hostName = dialog.getHostName();
@@ -395,6 +421,7 @@ public class DNSClient extends JFrame implements ActionListener {
 
 		try {
 			appendText(">> Sending request: "+request.toString());
+			// send request and receive response
 			String response = sendRequest(request, dnsAddress, dnsPort);
 			if (response.isEmpty())
 				appendText("<< The result was empty or there was no result at all."
@@ -430,17 +457,22 @@ public class DNSClient extends JFrame implements ActionListener {
 			int targetPort) throws UnknownHostException, IOException,
 			ClassNotFoundException {
 		Socket socket = null;
+		// create socket to target
 		socket = new Socket(targetAddress, targetPort);
+		// get outputstream to write to
 		ObjectOutputStream oos = new ObjectOutputStream(
 				socket.getOutputStream());
-		// send request
+		// send request object
 		oos.writeObject(request);
+		// flush the stream
 		oos.flush();
 
-		// read response
+		// open inputstream for reading
 		ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
 		String response;
+		// read response string
 		response = (String) ois.readObject();
+		// close the socket
 		socket.close();
 		return response;
 	}

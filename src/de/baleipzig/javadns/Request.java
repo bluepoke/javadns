@@ -6,6 +6,12 @@ import java.util.Iterator;
 
 import javax.naming.directory.Attribute;
 
+/**
+ * This class represents a serializable object that is passed from
+ * the DNSClient to the DNSServer.
+ * It can contain a request for a host's attribute, a registration
+ * of the client at the server or a request to reset the server.
+ */
 public class Request implements Serializable{
 
 	/**
@@ -94,6 +100,10 @@ public class Request implements Serializable{
 		return attributes;
 	}
 	
+	/**
+	 * @return The type and the contents of this request represented as
+	 * a single line String.
+	 */
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
