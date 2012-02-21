@@ -60,9 +60,14 @@ import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.tree.TreePath;
 
+/**
+ * The transparent DNS server.
+ */
 @SuppressWarnings("serial")
 public class DNSServer extends JFrame {
+	/** Entry in combobox for all IP addresses */
 	private static final String ALL_AVAILABLE_IP_ADDRESSES = "All available IP addresses";
+	/** System's line separator */
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static int DEFAULT_PORT = 53;
 	private JTextArea logTextArea;
@@ -84,6 +89,7 @@ public class DNSServer extends JFrame {
 		});
 		
 		try {
+			// set system's look & feel
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 			// simply ignore if it doesn't work
@@ -129,7 +135,7 @@ public class DNSServer extends JFrame {
 		cmbxIP.addItem(ALL_AVAILABLE_IP_ADDRESSES);
 		panel.add(cmbxIP);
 		
-		// read available IPs
+		// read available IPs and put them into the combo box
 		try {
 			for (InetAddress address : InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) {
 				cmbxIP.addItem(address);
@@ -205,19 +211,28 @@ public class DNSServer extends JFrame {
 		return DomainRecord.lookup(hostName, recordType);
 	}
 	
+	/**
+	 * Starts the server thread.
+	 */
 	private void start() {
 		cmbxIP.setEnabled(false);
 		btnStartServer.setEnabled(false);
 		btnStopServer.setEnabled(true);
 		int port = Integer.parseInt(txfPort.getText());
 		InetAddress address = null;
+		// get selected IP address out of combobox
 		if (cmbxIP.getSelectedItem() instanceof InetAddress) {
 			address = (InetAddress) cmbxIP.getSelectedItem();
 		}
+		// create the worker and execute
 		serverWorker = new ServerWorker(address, port);
 		serverWorker.execute();
 	}
 	
+	/**
+	 * Append text to the log area followed by a line separator
+	 * @param text The text to add
+	 */
 	private void appendText(String text) {
 		logTextArea.append(text + LINE_SEPARATOR);
 		logTextArea.setCaretPosition(logTextArea.getText().length());
@@ -253,7 +268,10 @@ public class DNSServer extends JFrame {
 			while (isRunning) {
 				Socket clientSocket;
 				try {
+					// wait for incoming requests
 					clientSocket = serverSocket.accept();
+					// pass the request on to a new thread
+					// that handes it and run it
 					new RequestThread(clientSocket).run();
 					
 				} catch (SocketTimeoutException e) {

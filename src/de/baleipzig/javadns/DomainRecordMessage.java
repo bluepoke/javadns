@@ -31,6 +31,9 @@ package de.baleipzig.javadns;
 
 import java.util.Vector;
 
+/**
+ * A message that displays what has happened while looking up the host's record.
+ */
 public class DomainRecordMessage {
 	private Vector<String> dnsResult;
 	private boolean localHostname;
