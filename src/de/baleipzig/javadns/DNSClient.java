@@ -1,11 +1,10 @@
 /* **************************************************************************
  *                                                                          *
  *  Copyright (C)  2011  Nils Foken, André Kießlich,                        *
- *  Copyright (C)  2011  Nils Foken, Andr? Kie?lich,                        *
  *                       Peter Kossek, Hans Laser                           *
  *                                                                          *
  *  Nils Foken       <nils.foken@it2009.ba-leipzig.de>                      *
- *  Andr? Kie?lich   <andre.kiesslich@it2009.ba-leipzig.de>                 *
+ *  André Kießlich   <andre.kiesslich@it2009.ba-leipzig.de>                 *
  *  Peter Kossek     <peter.kossek@it2009.ba-leipzig.de>                    *
  *  Hans Laser       <hans.laser@it2009.ba-leipzig.de>                      *
  *                                                                          *
