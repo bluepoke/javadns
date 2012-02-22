@@ -7,6 +7,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import javax.naming.directory.Attribute;
@@ -19,9 +25,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+/**
+ * A dialog window where the user can specify
+ * the records for registration at the server.
+ */
 @SuppressWarnings("serial")
 public class RegisterDialog extends JDialog {
-		
+	
+	/** */
 	private HashMap<JCheckBox, JTextField> map = new HashMap<JCheckBox, JTextField>();
 	
 	private static final String[] recordTypes = new String[] { 
@@ -30,6 +41,9 @@ public class RegisterDialog extends JDialog {
 		"DS", "HIP", "IPSECKEY", "KEY", "KX", "NAPTR", "NSEC", "NSEC3",
 		"NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV",
 		"SSHFP", "TA", "TKEY", "TSIG" };
+	
+	private static final String IPV4 = "A";
+	private static final String IPV6 = "AAAA";
 
 	public static final int OK = 0;
 	public static final int CANCEL = 1;
@@ -129,10 +143,14 @@ public class RegisterDialog extends JDialog {
 		
 		row++;
 		
+		// rows
+		
 		for (int i=0; i<recordTypes.length; i++) {
 			String recordType = recordTypes[i];
 			
-			JCheckBox box = new JCheckBox(recordType);
+			// each row has a checkbox and a textfield
+			
+			final JCheckBox box = new JCheckBox(recordType);
 			GridBagConstraints boxConstraints = new GridBagConstraints();
 			boxConstraints.insets = new Insets(0, 0, 0, 5);
 			boxConstraints.gridx = 0;
@@ -146,6 +164,40 @@ public class RegisterDialog extends JDialog {
 			gbc_textField.gridx = 1;
 			gbc_textField.gridy = row;
 			gbc_textField.weightx = 1;
+			// automatically select checkbox if something is typed
+			textField.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					box.setSelected(true);
+				}
+			});
+			
+			if (recordType.equals(IPV4)) {
+				// automatically insert IPv4-Address and select checkbox
+				try {
+					for (InetAddress ia: InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) {
+						if (ia instanceof Inet4Address) {
+							textField.setText(ia.getHostAddress());
+							box.setSelected(true);
+						}
+					}
+				} catch (UnknownHostException e) {
+					// do nothing
+				}
+			}
+			if (recordType.equals(IPV6)) {
+				// automatically insert IPv6-Address and select checkbox
+				try {
+					for (InetAddress ia: InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) {
+						if (ia instanceof Inet6Address) {
+							textField.setText(ia.getHostAddress());
+							box.setSelected(true);
+						}
+					}
+				} catch (UnknownHostException e) {
+					// do nothing
+				}
+			}
 			pnlInputPanel.add(textField, gbc_textField);
 			textField.setColumns(10);
 
@@ -154,6 +206,10 @@ public class RegisterDialog extends JDialog {
 		}		
 	}
 	
+	/**
+	 * The button clicked by the user.
+	 * @return {@link RegisterDialog#OK} or {@link RegisterDialog#CANCEL}
+	 */
 	public int getButtonClicked() {
 		return buttonClicked;
 	}
@@ -162,6 +218,10 @@ public class RegisterDialog extends JDialog {
 		return txfHostName.getText();
 	}
 	
+	/**
+	 * Returns the data specified by the user.
+	 * @return Key: Record type, like "AAAA", value: {@link BasicAttribute}
+	 */
 	public HashMap<String, Attribute> getAttributes() {
 		HashMap<String, Attribute> attributeMap = new HashMap<String, Attribute>();
 		for (JCheckBox cbx : map.keySet()) {

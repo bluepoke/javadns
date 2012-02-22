@@ -1,4 +1,33 @@
-package de.baleipzig.javadns;
+/* **************************************************************************
+ *                                                                          *
+ *  Copyright (C)  2011  Nils Foken, André Kießlich,                        *
+ *                       Peter Kossek, Hans Laser                           *
+ *                                                                          *
+ *  Nils Foken       <nils.foken@it2009.ba-leipzig.de>                      *
+ *  André Kießlich   <andre.kiesslich@it2009.ba-leipzig.de>                 *
+ *  Peter Kossek     <peter.kossek@it2009.ba-leipzig.de>                    *
+ *  Hans Laser       <hans.laser@it2009.ba-leipzig.de>                      *
+ *                                                                          *
+ ****************************************************************************
+ *                                                                          *
+ *  This file is part of 'javadns'.                                         *
+ *                                                                          *
+ *  This project is free software: you can redistribute it and/or modify    *
+ *  it under the terms of the GNU General Public License as published by    *
+ *  the Free Software Foundation, either version 3 of the License, or       *
+ *  any later version.                                                      *
+ *                                                                          *
+ *  This project is distributed in the hope that it will be useful,         *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ *  GNU General Public License for more details.                            *
+ *                                                                          *
+ *  You should have received a copy of the GNU General Public License       *
+ *  along with this project. If not, see <http://www.gnu.org/licenses/>.    *
+ *                                                                          *
+ ****************************************************************************/
+
+ package de.baleipzig.javadns;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +39,10 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+/**
+ * A 2-level tree model for the {@link DomainRecord}.
+ * The first level contains the hosts, the second level contains the host's records. 
+ */
 public class DNSTreeModel implements TreeModel {
 	private Vector<TreeModelListener> treeModelListeners = new Vector<TreeModelListener>();
 	private Object root;
@@ -105,6 +138,10 @@ public class DNSTreeModel implements TreeModel {
 				+ newValue);
 	}
 	
+	/**
+	 * Notify all listeners that the tree's strucutre has changed.
+	 * @param nodeDown The node where the change has happened below.
+	 */
 	protected void fireTreeStructureChanged(Object nodeDown) {
 		TreeModelEvent evt = new TreeModelEvent(this, new Object[] { nodeDown });
 		for (TreeModelListener tml : treeModelListeners) {

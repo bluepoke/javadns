@@ -41,6 +41,9 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
+/**
+ * Contains all registered and cached record types
+ */
 public class DomainRecord {
     
 	private static final String[] recordTypes = new String[] { 
@@ -53,6 +56,12 @@ public class DomainRecord {
     private static HashMap<String, HashMap<String, Attribute>> records 
     	= new HashMap<String, HashMap<String, Attribute>>();
     
+    /**
+     * Looks up the host's record.
+     * @param hostName Host to look up
+     * @param record Which record to look up
+     * @return A message as result
+     */
     public static DomainRecordMessage lookup(String hostName, String record) {
     	DomainRecordMessage dnsMessage = new DomainRecordMessage();
     	dnsMessage.setHostName(hostName);
@@ -133,11 +142,17 @@ public class DomainRecord {
 		return attributes.get(record);
     }
 
-	public static boolean reset() {
+    /**
+     * Reset the server.
+     */
+	public static void reset() {
 		records.clear();
-		return true;
 	}
 	
+	/**
+	 * Creates an empty {@link BasicAttribute} for each record type.
+	 * @return HashMap of entry attributes.
+	 */
 	private static HashMap<String, Attribute> createCompleteAttributes() {
 		HashMap<String, Attribute> attributes = new HashMap<String, Attribute>();
 		
@@ -148,6 +163,12 @@ public class DomainRecord {
 		return attributes;
 	}
 	
+	/**
+	 * Adds records to the host's entry
+	 * @param desiredHostName The host's name
+	 * @param desiredAttributes The attributes to set
+	 * @return The previous attributes for this host, or <code>null</code> if there were none.
+	 */
 	public static HashMap<String, Attribute> addRecord(String desiredHostName, HashMap<String, Attribute> desiredAttributes) {
 		HashMap<String, Attribute> attributes = createCompleteAttributes();
 		
