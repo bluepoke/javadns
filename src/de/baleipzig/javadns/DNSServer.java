@@ -312,7 +312,7 @@ public class DNSServer extends JFrame {
 		public void run() {
 			try {
 				// read request
-				appendText("Connection from " + socket.getInetAddress().getHostAddress());
+				appendText("Connection from " + socket.getInetAddress().getHostAddress()+" ["+socket.getInetAddress().getHostName()+"]");
 				ObjectInputStream ois = new ObjectInputStream(
 						socket.getInputStream());
 				Request request = (Request) ois.readObject();
