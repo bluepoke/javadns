@@ -36,6 +36,8 @@ public class Request implements Serializable{
 	private int type;
 	private HashMap<String, Attribute> attributes = new HashMap<String, Attribute>();
 	
+	private boolean resetAllowed = false;  
+	
 	/**
 	 * Creates a RESET-Request
 	 */
@@ -99,6 +101,15 @@ public class Request implements Serializable{
 	public HashMap<String, Attribute> getAttributes() {
 		return attributes;
 	}
+	
+	public boolean isResetAllowed() {
+		return resetAllowed;
+	}
+	
+	public void setResetAllowed(boolean resetAllowed) {
+		this.resetAllowed = resetAllowed;
+	}
+	
 	
 	/**
 	 * @return The type and the contents of this request represented as

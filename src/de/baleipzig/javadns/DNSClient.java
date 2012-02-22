@@ -87,6 +87,8 @@ public class DNSClient extends JFrame implements ActionListener {
 	private final ButtonGroup btngrpRecordType = new ButtonGroup();
 	private JTextField txfDnsPort;
 	private JRadioButton rdbtnOTHER;
+	
+	private final boolean RESET_ALLOWED = true;
 
 	public DNSClient() {
 		/* 
@@ -419,6 +421,9 @@ public class DNSClient extends JFrame implements ActionListener {
 		} else if (evt.getActionCommand().equals(RESET)) {
 			// create reset request
 			request = new Request();
+			// there may be different clients, but not all of them should be allowed to
+			// reset the server
+			request.setResetAllowed(RESET_ALLOWED);
 		} else if (evt.getActionCommand().equals(REGISTER)) {
 			// open dialog to specify record entries
 			RegisterDialog dialog = new RegisterDialog();

@@ -321,14 +321,16 @@ public class DNSServer extends JFrame {
 				String response = "";
 				if(request.getType() == Request.RESET) {
 					appendText("Trying to reset the records table.");
-					if (DomainRecord.reset()) {
-						response = "Reset successful." + LINE_SEPARATOR;
+					if (request.isResetAllowed()) {
+						DomainRecord.reset();
+						response = "Reset successful.";
 						appendText("Sending: 'Reset successful'." + LINE_SEPARATOR);
 						// remove selection from tree
 						recordTree.setSelectionPath(null);
 					}
 					else {
-						response = "Sending: 'Reset was not possible'." + LINE_SEPARATOR;
+						response = "Reset is not allowed for this client.";
+						appendText("Sending: 'Reset is not allowed for this client'" + LINE_SEPARATOR);
 					}
 				}
 				else if (request.getType() == Request.LOOKUP){

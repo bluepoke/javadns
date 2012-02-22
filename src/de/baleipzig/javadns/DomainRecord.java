@@ -141,12 +141,9 @@ public class DomainRecord {
 
     /**
      * Reset the server.
-     * @return true (This is quite useless at the moment. But in the future
-     * there might be a check whether the client is allowed to reset the server.)
      */
-	public static boolean reset() {
+	public static void reset() {
 		records.clear();
-		return true;
 	}
 	
 	/**
