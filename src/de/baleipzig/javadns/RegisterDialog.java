@@ -35,6 +35,10 @@ public class RegisterDialog extends JDialog {
 	/** */
 	private HashMap<JCheckBox, JTextField> map = new HashMap<JCheckBox, JTextField>();
 	
+	
+	/*
+	 * Records
+	 */
 	private static final String[] recordTypes = new String[] { 
 		"A", "AAAA", "LOC", "MX", "NS", "RP", "TXT", "AFSDB",
 		"APL", "CERT", "CNAME", "DHCID", "DLV", "DNAME", "DNSKEY",
@@ -42,6 +46,9 @@ public class RegisterDialog extends JDialog {
 		"NSEC3PARAM", "PTR", "RRSIG", "SIG", "SOA", "SPF", "SRV",
 		"SSHFP", "TA", "TKEY", "TSIG" };
 	
+	/*
+	 * Statics
+	 */
 	private static final String IPV4 = "A";
 	private static final String IPV6 = "AAAA";
 
@@ -144,11 +151,10 @@ public class RegisterDialog extends JDialog {
 		row++;
 		
 		// rows
-		
 		for (int i=0; i<recordTypes.length; i++) {
 			String recordType = recordTypes[i];
 			
-			// each row has a checkbox and a textfield
+			// each row (recordtype) has a checkbox and a textfield
 			
 			final JCheckBox box = new JCheckBox(recordType);
 			GridBagConstraints boxConstraints = new GridBagConstraints();
@@ -179,6 +185,8 @@ public class RegisterDialog extends JDialog {
 						if (ia instanceof Inet4Address) {
 							textField.setText(ia.getHostAddress());
 							box.setSelected(true);
+							// break on primary interface ipv4 address
+							break;
 						}
 					}
 				} catch (UnknownHostException e) {
@@ -192,6 +200,8 @@ public class RegisterDialog extends JDialog {
 						if (ia instanceof Inet6Address) {
 							textField.setText(ia.getHostAddress());
 							box.setSelected(true);
+							// break on primary interface ipv6 address
+							break;
 						}
 					}
 				} catch (UnknownHostException e) {
