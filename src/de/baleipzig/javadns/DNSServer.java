@@ -105,6 +105,7 @@ public class DNSServer extends JFrame {
 		logTextArea.setLineWrap(true);
 		logTextArea.setWrapStyleWord(true);
 		logScrollPane.setViewportView(logTextArea);
+		// ???
 		logTextArea.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
 				null, null));
 		
@@ -115,6 +116,7 @@ public class DNSServer extends JFrame {
 		treeModel = new DNSTreeModel("DNS Records");
 		recordTree.setModel(treeModel);
 		treeScrollPane.setViewportView(recordTree);
+		// ???
 		recordTree.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
 				null, null));
 		
@@ -152,6 +154,7 @@ public class DNSServer extends JFrame {
 					if (serverWorker.isRunning) {
 						serverWorker.stop();
 					}
+					// ???
 					else if (!serverWorker.isDone()) {
 						appendText("Still stopping server..."+LINE_SEPARATOR);
 					}

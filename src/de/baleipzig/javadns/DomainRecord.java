@@ -77,6 +77,7 @@ public class DomainRecord {
     				return dnsMessage;
     			}
 				// the attribute could not be found for a known hostname
+    			//////////////////////////////////////////////////////////////////////////////////////////
     			else {
     				Attribute lookupResult = remote_lookup(hostName, record);
     				recordsEntry.put(lookupResult.getID(), lookupResult);
@@ -92,6 +93,7 @@ public class DomainRecord {
     			}
     		}
     		// if either hostName or the specific attribute was not found, do a remote lookup for that
+    		/////////////////////////////////////////////////////////////////////////////////////////////
     		else {
     			Attribute lookupResult = remote_lookup(hostName, record);
 
@@ -110,13 +112,14 @@ public class DomainRecord {
 				return dnsMessage;    		
     		}
     	} catch (NamingException e) {
-			dnsMessage.setUnknownDNS(true);
+		   	dnsMessage.setUnknownDNS(true);
     	} catch (NullPointerException e) {
     		dnsMessage.setUnknownAttribute(true);
     	}
 		dnsMessage.setDnsResult(result);
 		return dnsMessage;
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static Attribute remote_lookup(String hostName, String record) throws NamingException {
     	// create a JNDI environment and context
