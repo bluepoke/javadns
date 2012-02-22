@@ -120,7 +120,8 @@ public class DNSClient extends JFrame implements ActionListener {
 		pnlMainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(pnlMainPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_pnlMainPanel = new GridBagLayout();
-		gbl_pnlMainPanel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
+		// warum sind es fuenf 0 da es doch nur vier Spalten sind
+		gbl_pnlMainPanel.columnWidths = new int[] { 0, 0, 0, 0, 0};
 		gbl_pnlMainPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_pnlMainPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0,
 				Double.MIN_VALUE };
@@ -128,10 +129,14 @@ public class DNSClient extends JFrame implements ActionListener {
 				0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		pnlMainPanel.setLayout(gbl_pnlMainPanel);
 
+		// Label (DNS IP) and  TextField (IP)
 		JLabel lblDns = new JLabel("DNS IP:");
 		GridBagConstraints gbc_lblDns = new GridBagConstraints();
+		// ausrichtung im inneren
 		gbc_lblDns.anchor = GridBagConstraints.EAST;
+		// abstand nach rechts bekommen
 		gbc_lblDns.insets = new Insets(0, 0, 5, 5);
+		// position im Grid zuordnen
 		gbc_lblDns.gridx = 0;
 		gbc_lblDns.gridy = 0;
 		pnlMainPanel.add(lblDns, gbc_lblDns);
@@ -146,7 +151,9 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfDnsIP.gridy = 0;
 		pnlMainPanel.add(txfDnsIP, gbc_txfDnsIP);
 		txfDnsIP.setColumns(10);
+  	// Label (DNS IP) and  TextField (IP)
 
+		// Label (DNS Port) and TextField (Port)
 		JLabel lblNewLabel = new JLabel("DNS Port:");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
@@ -165,7 +172,9 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfDnsPort.gridy = 1;
 		pnlMainPanel.add(txfDnsPort, gbc_txfDnsPort);
 		txfDnsPort.setColumns(10);
+		// Label (DNS Port) and TextField (Port)
 
+		// Label (Name) and TextFiel (DomainName)
 		JLabel lblName = new JLabel("Name:");
 		GridBagConstraints gbc_lblName = new GridBagConstraints();
 		gbc_lblName.insets = new Insets(0, 0, 5, 5);
@@ -184,9 +193,10 @@ public class DNSClient extends JFrame implements ActionListener {
 		gbc_txfName.gridy = 2;
 		pnlMainPanel.add(txfName, gbc_txfName);
 		txfName.setColumns(10);
-		
+		// Label (Name) and TextFiel (DomainName)
 		// radio buttons for common record types
 
+		// Label (Record Type)
 		JLabel lblRequestType = new JLabel("Record Type:");
 		GridBagConstraints gbc_lblRequestType = new GridBagConstraints();
 		gbc_lblRequestType.anchor = GridBagConstraints.EAST;
@@ -197,7 +207,6 @@ public class DNSClient extends JFrame implements ActionListener {
 
 		JRadioButton rdbtnA = new JRadioButton("A (IPv4)");
 		rdbtnA.setActionCommand("A");
-
 		rdbtnA.setSelected(true);
 		btngrpRecordType.add(rdbtnA);
 		GridBagConstraints gbc_rdbtnA = new GridBagConstraints();
@@ -481,7 +490,10 @@ public class DNSClient extends JFrame implements ActionListener {
 		ObjectOutputStream oos = new ObjectOutputStream(
 				socket.getOutputStream());
 		// send request object
+		// schreibt in den OutputStream
 		oos.writeObject(request);
+		// alles was noch im Buffer noch drin ist wird dann hinterhergeschickt
+		// an den OutputStream
 		// flush the stream
 		oos.flush();
 
