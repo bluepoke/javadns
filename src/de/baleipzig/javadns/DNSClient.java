@@ -356,9 +356,6 @@ public class DNSClient extends JFrame implements ActionListener {
 		textArea.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null,
 				null, null));
 
-		JLabel lblStatus = new JLabel("Some status label");
-		getContentPane().add(lblStatus, BorderLayout.SOUTH);
-
 		// center on screen
 		setLocationRelativeTo(null);
 		// show frame
