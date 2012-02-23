@@ -92,6 +92,7 @@ public class DNSTreeModel implements TreeModel {
 		// parent is host --> child is attribute
 		else {
 			Object[] attributeKeys = records.get(parent).keySet().toArray();
+			Arrays.sort(attributeKeys);
 			return records.get(parent).get(attributeKeys[index]);
 		}
 	}
@@ -113,6 +114,7 @@ public class DNSTreeModel implements TreeModel {
 		// parent is host --> child is attribute
 		else {
 			Object[] attributeKeys = records.get(parent).keySet().toArray();
+			Arrays.sort(attributeKeys);
 			for (int i=0; i<attributeKeys.length; i++) {
 				if (records.get(parent).get(attributeKeys[i]).equals(child)) {
 					return i;
