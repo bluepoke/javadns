@@ -349,14 +349,13 @@ public class DNSServer extends JFrame {
 					if (result == null) {
 						appendText("Host '" + socket.getInetAddress().getHostAddress() 
 								+ "' is now identified as '" + request.getHostName() + "'" + LINE_SEPARATOR);
-						response = "You are now identified as '" + request.getHostName()
-								+ "'." + LINE_SEPARATOR;
+						response = "You are now identified as '" + request.getHostName() + "'.";
 					}
 					else {
 						appendText("Host '" + socket.getInetAddress().getHostAddress() 
 								+ "' replaces identification of '" + request.getHostName() + "'" + LINE_SEPARATOR);
 						response = "You are now identified as '" + request.getHostName()
-								+ "' and replaced the previously held record." + LINE_SEPARATOR;
+								+ "' and replaced the previously held record.";
 					}
 				}
 				
