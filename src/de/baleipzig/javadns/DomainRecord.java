@@ -108,6 +108,7 @@ public class DomainRecord {
 
     			recordsEntry = new HashMap<String, Attribute>();
     			recordsEntry.put(lookupResult.getID(), lookupResult);
+    			// avoid multiple threads to write to the hash table at the same time
     			synchronized (records) {
     				records.put(hostName, recordsEntry);
 				}
@@ -177,12 +178,16 @@ public class DomainRecord {
 		for (String key : desiredAttributes.keySet()) {
 			attributes.put(key, desiredAttributes.get(key));
 		}
+		// avoid multiple threads to write to the hash table at the same time
 		synchronized (records) {
 			return records.put(desiredHostName, attributes);
 		}
 	}
 	
 	public static HashMap<String, HashMap<String, Attribute>> getRecords() {
-		return records;
+		// if some thread is writing to records wait for it to finish
+		synchronized (records) {
+			return records;
+		}
 	}
 }
