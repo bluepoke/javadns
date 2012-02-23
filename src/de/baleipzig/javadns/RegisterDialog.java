@@ -147,6 +147,11 @@ public class RegisterDialog extends JDialog {
 		gbc_txfHostName.weightx = 1;
 		pnlInputPanel.add(txfHostName, gbc_txfHostName);
 		txfHostName.setColumns(10);
+		try {
+			txfHostName.setText(InetAddress.getLocalHost().getHostName());
+		} catch (UnknownHostException e1) {
+			// leave it blank
+		}
 		
 		row++;
 		
