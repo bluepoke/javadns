@@ -108,7 +108,9 @@ public class DomainRecord {
 
     			recordsEntry = new HashMap<String, Attribute>();
     			recordsEntry.put(lookupResult.getID(), lookupResult);
-    			records.put(hostName, recordsEntry);
+    			synchronized (records) {
+    				records.put(hostName, recordsEntry);
+				}
 
     			// prepare the results
     			NamingEnumeration<?> resultEnumeration = lookupResult.getAll();
@@ -175,8 +177,9 @@ public class DomainRecord {
 		for (String key : desiredAttributes.keySet()) {
 			attributes.put(key, desiredAttributes.get(key));
 		}
-		
-		return records.put(desiredHostName, attributes);
+		synchronized (records) {
+			return records.put(desiredHostName, attributes);
+		}
 	}
 	
 	public static HashMap<String, HashMap<String, Attribute>> getRecords() {
